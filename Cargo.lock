@@ -3,5 +3,13 @@
 version = 4
 
 [[package]]
-name = "justpic"
+name = "justpic-backend"
+version = "0.1.0"
+
+[[package]]
+name = "justpic-database"
+version = "0.1.0"
+
+[[package]]
+name = "justpic-storage"
 version = "0.1.0"
