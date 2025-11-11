@@ -5,6 +5,22 @@ edition.workspace = true
 description = "Justpic backend app"
 
 [dependencies]
+# Actix
+actix-web = { workspace = true }
+actix-multipart = { workspace = true }
+actix-cors = { workspace = true }
+
+# Futures
+async-trait = { workspace = true }
+tokio = { workspace = true, features = ["rt-multi-thread", "macros", "fs", "io-util"] }
+tokio-util = { workspace = true }
+
+# Utils
+derive_more = { workspace = true, features = ["from", "display"] }
+
+# Logging
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
 
 [lints]
 workspace = true
