@@ -7,15 +7,22 @@ use crate::config::Configuration;
 /// The application state contains
 /// connections and configurations for the server
 pub struct State {
+    /// State wrapped in Arc for safe transfer between threads
+    inner: Arc<StateInner>,
+}
+
+pub struct StateInner {
     /// Application configuration for receiving settings in endpoints
-    config: Arc<Configuration>,
+    config: Configuration,
 }
 
 impl State {
     /// Create a new application context
     pub fn new(config: Configuration) -> Self {
-        let config = Arc::new(config);
+        let inner = StateInner { config };
 
-        State { config }
+        State {
+            inner: Arc::new(inner),
+        }
     }
 }
