@@ -8,10 +8,10 @@ use crate::config::Configuration;
 /// connections and configurations for the server
 pub struct State {
     /// State wrapped in Arc for safe transfer between threads
-    inner: Arc<StateInner>,
+    inner: Arc<InnerState>,
 }
 
-pub struct StateInner {
+pub struct InnerState {
     /// Application configuration for receiving settings in endpoints
     config: Configuration,
 }
@@ -19,7 +19,7 @@ pub struct StateInner {
 impl State {
     /// Create a new application context
     pub fn new(config: Configuration) -> Self {
-        let inner = StateInner { config };
+        let inner = InnerState { config };
 
         State {
             inner: Arc::new(inner),
