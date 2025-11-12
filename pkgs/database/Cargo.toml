@@ -1,0 +1,10 @@
+[package]
+name = "justpic-database"
+version = "0.1.0"
+edition.workspace = true
+description = "Justpic database package"
+
+[dependencies]
+
+[lints]
+workspace = true

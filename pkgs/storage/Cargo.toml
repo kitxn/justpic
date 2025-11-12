@@ -1,0 +1,10 @@
+[package]
+name = "justpic-storage"
+version = "0.1.0"
+edition.workspace = true
+description = "Justpic files storage package"
+
+[dependencies]
+
+[lints]
+workspace = true
