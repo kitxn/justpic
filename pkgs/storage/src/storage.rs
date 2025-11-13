@@ -10,6 +10,16 @@ pub struct Storage {
 
 // TODO: Add key validation
 impl Storage {
+    pub fn new(root: std::path::PathBuf) -> Self {
+        Storage { root }
+    }
+
+    pub fn init(&self) -> Result<(), super::StorageError> {
+        std::fs::create_dir_all(&self.root)?;
+
+        Ok(())
+    }
+
     pub async fn get(&self, key: &str) -> Result<FileStream, super::StorageError> {
         let path = self.root.join(&key[..2]).join(&key[2..4]).join(key);
         let file = File::open(path).await?;

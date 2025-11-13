@@ -6,7 +6,6 @@ description = "Justpic files storage package"
 
 [dependencies]
 # Futures
-async-trait = { workspace = true }
 tokio = { workspace = true, features = ["rt-multi-thread", "macros", "fs", "io-util"] }
 tokio-util = { workspace = true }
 

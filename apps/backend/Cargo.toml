@@ -7,6 +7,10 @@ description = "Justpic backend app"
 [dependencies]
 # Todo: move backend only crates to this Cargo.toml file
 
+# Internal
+justpic-database = { path = "../../pkgs/database" }
+justpic-storage = { path = "../../pkgs/storage" }
+
 # Actix
 actix-web = { workspace = true }
 actix-multipart = { workspace = true }
