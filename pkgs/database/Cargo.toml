@@ -5,6 +5,15 @@ edition.workspace = true
 description = "Justpic database package"
 
 [dependencies]
+# Futures
+tokio = { workspace = true, features = ["rt-multi-thread", "macros", "fs", "io-util"] }
+tokio-util = { workspace = true }
+
+# Database
+sqlx = { workspace = true, features = ["runtime-tokio", "sqlite", "migrate"] }
+
+# Utils
+derive_more = { workspace = true, features = ["from", "display"] }
 
 [lints]
 workspace = true

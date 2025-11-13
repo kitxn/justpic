@@ -11,10 +11,14 @@ pub const APP_VERSION: &str = env!("CARGO_PKG_VERSION");
 
 /// Preparing the application
 /// and initializing the basic components
-pub async fn setup_app(cfg: &config::Configuration) -> error::Result<state::State> {
-    tracing::info!("Setup {APP_NAME}-{APP_VERSION}");
+pub async fn setup_app(
+    cfg: &config::Configuration,
+    pool: justpic_database::DatabasePool,
+    storage: justpic_storage::storage::Storage,
+) -> error::Result<state::State> {
+    tracing::info!("Setting up {APP_NAME}-{APP_VERSION}...");
 
-    let state = state::State::new(cfg.clone());
+    let state = state::State::new(cfg.clone(), pool, storage);
 
     Ok(state)
 }

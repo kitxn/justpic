@@ -7,6 +7,14 @@ pub enum Error {
     #[display("IO_ERROR: {_0}")]
     Io(std::io::Error),
 
+    #[from]
+    #[display("DB_ERROR: {_0}")]
+    Database(justpic_database::DatabaseError),
+
+    #[from]
+    #[display("STORAGE_ERROR: {_0}")]
+    Storage(justpic_storage::StorageError),
+
     #[from(skip)]
     #[display("UNDEFINED_BACKEND_ERROR: {_0}")]
     Custom(String),

@@ -5,6 +5,14 @@ edition.workspace = true
 description = "Justpic files storage package"
 
 [dependencies]
+# Futures
+tokio = { workspace = true, features = ["rt-multi-thread", "macros", "fs", "io-util"] }
+tokio-util = { workspace = true }
+
+# Utils
+rand = { workspace = true }
+uuid = { workspace = true, features = ["v4"] }
+derive_more = { workspace = true, features = ["from", "display"] }
 
 [lints]
 workspace = true
