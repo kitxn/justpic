@@ -1,25 +1,20 @@
-[workspace]
-resolver = "2"
-members = [
-  "apps/backend",
-  "pkgs/database",
-  "pkgs/storage",
-]
-
-[workspace.package]
+[package]
+name = "justpic-backend"
+version = "0.1.0"
 edition = "2024"
+description = "Justpic backend app"
 
-[workspace.dependencies]
+[dependencies]
 # Actix
 actix-web = "4.11.0"
 actix-multipart = "0.7.2"
 actix-cors = "0.7.1"
 # Futures
 async-trait = "0.1.89"
-tokio = "1.47.1"
+tokio = { version = "1.47.1", features = ["rt-multi-thread", "macros", "fs", "io-util"] }
 tokio-util = "0.7.16"
 # Database
-sqlx = "0.8.5"
+sqlx = { version = "0.8.5", features = ["runtime-tokio", "sqlite", "migrate"] }
 # Serialization
 serde = "1.0.219"
 serde_json = "1.0.140"
@@ -27,16 +22,16 @@ serde_json = "1.0.140"
 rand = "0.9.2"
 uuid = "1.17.0"
 base64 = "0.22.1"
-derive_more = "2.0.1"
+derive_more = { version = "2.0.1", features = ["from", "display"] }
 validator = "0.19"
 # Docs
-utoipa = "5.4.0"
-utoipa-swagger-ui = "9.0.2"
+utoipa = { version = "5.4.0", features = ["actix_extras"] }
+utoipa-swagger-ui = { version = "9.0.2", features = ["actix-web"] }
 # Logging
 tracing = "0.1.40"
 tracing-subscriber = "0.3.18"
 
-[workspace.lints.clippy]
+[lints.clippy]
 bool_to_int_with_if = "warn"
 borrow_as_ptr = "warn"
 cfg_not_test = "warn"

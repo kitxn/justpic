@@ -20,17 +20,17 @@ pub struct InnerState {
     /// Application configuration for receiving settings in endpoints
     config: Configuration,
 
-    database: justpic_database::DatabasePool,
+    database: crate::database::DatabasePool,
 
-    storage: justpic_storage::storage::Storage,
+    storage: crate::storage::Storage,
 }
 
 impl State {
     /// Create a new application context
     pub fn new(
         config: Configuration,
-        database: justpic_database::DatabasePool,
-        storage: justpic_storage::storage::Storage,
+        database: crate::database::DatabasePool,
+        storage: crate::storage::Storage,
     ) -> Self {
         let inner = InnerState {
             config,

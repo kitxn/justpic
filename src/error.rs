@@ -9,11 +9,11 @@ pub enum Error {
 
     #[from]
     #[display("DB_ERROR: {_0}")]
-    Database(justpic_database::DatabaseError),
+    Database(crate::database::DatabaseError),
 
     #[from]
     #[display("STORAGE_ERROR: {_0}")]
-    Storage(justpic_storage::StorageError),
+    Storage(crate::storage::StorageError),
 
     #[from(skip)]
     #[display("UNDEFINED_BACKEND_ERROR: {_0}")]

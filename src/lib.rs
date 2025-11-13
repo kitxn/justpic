@@ -6,6 +6,9 @@ pub mod docs;
 pub mod error;
 pub mod state;
 
+pub mod database;
+pub mod storage;
+
 pub const APP_NAME: &str = env!("CARGO_PKG_NAME");
 pub const APP_VERSION: &str = env!("CARGO_PKG_VERSION");
 
@@ -13,8 +16,8 @@ pub const APP_VERSION: &str = env!("CARGO_PKG_VERSION");
 /// and initializing the basic components
 pub async fn setup_app(
     cfg: &config::Configuration,
-    pool: justpic_database::DatabasePool,
-    storage: justpic_storage::storage::Storage,
+    pool: database::DatabasePool,
+    storage: storage::Storage,
 ) -> error::Result<state::State> {
     tracing::info!("Setting up {APP_NAME}-{APP_VERSION}...");
 

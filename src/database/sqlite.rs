@@ -1,6 +1,6 @@
 use sqlx::{SqlitePool, sqlite::SqliteConnectOptions};
 
-use crate::{DatabaseError, DatabasePool};
+use super::{DatabaseError, DatabasePool};
 
 pub async fn open_db(path: &std::path::Path) -> Result<DatabasePool, DatabaseError> {
     if let Some(path) = path.parent() {
