@@ -6,6 +6,13 @@ pub mod docs;
 pub mod error;
 pub mod state;
 
+pub mod auth;
+
+pub mod models;
+pub mod routes;
+
+pub mod util;
+
 pub mod database;
 pub mod storage;
 
