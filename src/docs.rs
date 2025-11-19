@@ -5,6 +5,8 @@ use utoipa::OpenApi;
 #[openapi(
     paths(
       routes::ping::ping,
+
+      routes::files::get::get_file_stream,
     ),
     info(
       title = "justpic-backend",
@@ -14,6 +16,7 @@ use utoipa::OpenApi;
     tags(
       (name = "auth", description = "Authentication endpoints"),
       (name = "cards", description = "Cards management"),
+      (name = "files", description = "Files endpoints"),
       (name = "system", description = "System endpoints")
     )
 )]

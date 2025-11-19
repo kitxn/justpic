@@ -15,6 +15,20 @@ pub struct State {
     inner: Arc<InnerState>,
 }
 
+impl State {
+    pub fn store(&self) -> &crate::storage::Storage {
+        &self.inner.storage
+    }
+
+    pub fn db(&self) -> &crate::database::DatabasePool {
+        &self.inner.database
+    }
+
+    pub fn cfg(&self) -> &Configuration {
+        &self.inner.config
+    }
+}
+
 #[derive(Debug)]
 pub struct InnerState {
     /// Application configuration for receiving settings in endpoints
