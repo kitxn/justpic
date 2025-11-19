@@ -44,7 +44,8 @@ pub fn setup_logger() {
 
 /// Configuring API endpoints and DI
 pub fn configure_api(cfg: &mut actix_web::web::ServiceConfig, state: state::State) {
-    cfg.app_data(web::Data::new(state));
+    cfg.app_data(web::Data::new(state))
+        .configure(routes::config);
 }
 
 use actix_web::web;
