@@ -1,4 +1,6 @@
-use actix_web::{HttpResponse, ResponseError, http::StatusCode};
+use actix_web::{HttpResponse, http::StatusCode};
+
+use crate::models::error::ApiError;
 
 /// Error type for the application
 ///
@@ -31,6 +33,11 @@ impl actix_web::ResponseError for Error {
     }
 
     fn error_response(&self) -> HttpResponse {
-        HttpResponse::build(self.status_code()).finish()
+        let code = self.status_code();
+        let code_u16 = code.as_u16();
+        HttpResponse::build(code).json(ApiError {
+            code: code_u16,
+            message: self.to_string(),
+        })
     }
 }

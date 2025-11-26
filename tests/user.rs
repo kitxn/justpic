@@ -1,0 +1,26 @@
+use justpic_backend::database::schemas::users::User;
+
+#[tokio::test]
+async fn insert_user_into_db() {
+    let mut conn = justpic_backend::database::sqlite::open_in_memory_db()
+        .await
+        .unwrap();
+
+    let user = User::new("john_doe".to_string(), "hunter42".to_string());
+    let id = user.id();
+
+    justpic_backend::database::repositories::users::insert(&user, &mut conn)
+        .await
+        .unwrap();
+
+    let inserted = justpic_backend::database::repositories::users::fetch_by_id(id, &mut conn)
+        .await
+        .unwrap()
+        .expect("User not inserted in db");
+
+    assert_eq!(user.username(), inserted.username());
+    assert!(matches!(
+        user.role(),
+        justpic_backend::database::schemas::users::UserRole::Regular
+    ));
+}
