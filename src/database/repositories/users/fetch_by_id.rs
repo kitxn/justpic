@@ -1,9 +1,9 @@
 use sqlx::{Executor, Sqlite, query_as};
 
-use crate::database::{DatabaseError, schemas::users::User};
+use crate::database::schemas::users::User;
 
 /// Fetch [`User`] item by id
-pub async fn fetch_by_id<'a, E>(id: &uuid::Uuid, exec: E) -> Result<Option<User>, DatabaseError>
+pub async fn fetch_by_id<'a, E>(id: &uuid::Uuid, exec: E) -> Result<Option<User>, sqlx::Error>
 where
     E: Executor<'a, Database = Sqlite>,
 {

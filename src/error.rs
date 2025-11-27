@@ -5,23 +5,81 @@ use crate::models::error::ApiError;
 /// Error type for the application
 ///
 /// Contains the Kind and a possible error details
-#[derive(Debug, derive_more::From, derive_more::Display)]
+#[derive(Debug, derive_more::Display)]
 pub enum Error {
-    #[from]
+    /// Access to the resource is denied.
+    ///
+    /// (For example, viewing a private profile without authorization)
+    #[display("ACCESS_DENIED")]
+    AccessDenied,
+
+    /// The required resource was not found
+    #[display("RESOURCE_NOT_FOUND")]
+    ResourceNotFound,
+
+    /// The sought object was not found
+    ///
+    /// (for example, the sought profile)
+    #[display("ITEM_NOT_FOUND")]
+    ItemNotFound,
+
+    /// The server address is already in use
+    #[display("HOST_SOCKET_IN_USE")]
+    SocketInUse,
+
+    /// The object already exists and cannot be created again
+    #[display("ALREADY_EXISTS")]
+    Conflict,
+
+    /// Incorrect data
+    #[display("BAD_INPUT")]
+    BadInput,
+
+    /// IO error
     #[display("IO_ERROR: {_0}")]
     Io(std::io::Error),
 
-    #[from]
+    /// Db error
     #[display("DB_ERROR: {_0}")]
-    Database(crate::database::DatabaseError),
+    Database(sqlx::Error),
 
-    #[from]
+    /// File storage error
     #[display("STORAGE_ERROR: {_0}")]
     Storage(crate::storage::StorageError),
+}
 
-    #[from(skip)]
-    #[display("UNDEFINED_BACKEND_ERROR: {_0}")]
-    Custom(String),
+impl From<sqlx::migrate::MigrateError> for Error {
+    fn from(value: sqlx::migrate::MigrateError) -> Self {
+        Error::Database(value.into())
+    }
+}
+
+impl From<sqlx::Error> for Error {
+    fn from(value: sqlx::Error) -> Self {
+        match value {
+            sqlx::Error::RowNotFound => Error::ItemNotFound,
+            _ => Error::Database(value),
+        }
+    }
+}
+
+impl From<std::io::Error> for Error {
+    fn from(value: std::io::Error) -> Self {
+        match value.kind() {
+            std::io::ErrorKind::NotFound => Error::ResourceNotFound,
+            std::io::ErrorKind::PermissionDenied => Error::AccessDenied,
+            std::io::ErrorKind::AddrInUse => Error::SocketInUse,
+            std::io::ErrorKind::AlreadyExists => Error::Conflict,
+            std::io::ErrorKind::InvalidData | std::io::ErrorKind::InvalidInput => Error::BadInput,
+            _ => Error::Io(value),
+        }
+    }
+}
+
+impl From<crate::storage::StorageError> for Error {
+    fn from(value: crate::storage::StorageError) -> Self {
+        Error::Storage(value)
+    }
 }
 
 /// [Error] Result alias
@@ -29,7 +87,10 @@ pub type Result<T> = std::result::Result<T, Error>;
 
 impl actix_web::ResponseError for Error {
     fn status_code(&self) -> StatusCode {
-        StatusCode::INTERNAL_SERVER_ERROR
+        match self {
+            Error::ItemNotFound | Error::ResourceNotFound => StatusCode::NOT_FOUND,
+            _ => StatusCode::INTERNAL_SERVER_ERROR,
+        }
     }
 
     fn error_response(&self) -> HttpResponse {

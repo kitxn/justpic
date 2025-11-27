@@ -1,9 +1,9 @@
 use sqlx::{Executor, Sqlite, sqlite::SqliteQueryResult};
 
-use crate::database::{DatabaseError, schemas::users::User};
+use crate::database::schemas::users::User;
 
 /// Insert [`User`] item into database
-pub async fn insert<'a, E>(item: &User, exec: E) -> Result<SqliteQueryResult, DatabaseError>
+pub async fn insert<'a, E>(item: &User, exec: E) -> Result<SqliteQueryResult, sqlx::Error>
 where
     E: Executor<'a, Database = Sqlite>,
 {

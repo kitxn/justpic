@@ -54,6 +54,8 @@ impl Storage {
     pub fn init(&self) -> Result<(), StorageError> {
         std::fs::create_dir_all(&self.root)?;
 
+        tracing::info!("File storage opened!");
+
         Ok(())
     }
 

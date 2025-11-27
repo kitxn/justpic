@@ -2,8 +2,6 @@ use actix_web::{App, HttpServer};
 
 use justpic_backend::{database, error::Result, storage};
 
-// TODO: ADD INTEGR. TESTS FOR DB MODELS
-
 #[tokio::main]
 async fn main() -> Result<()> {
     justpic_backend::setup_logger();
@@ -25,11 +23,11 @@ async fn main() -> Result<()> {
     tracing::info!("Running swagger doc on http://{}/docs/", config.host_addr());
     HttpServer::new(move || {
         App::new()
-            .configure(justpic_backend::configure_api_docs)
             .configure(|cfg| {
                 let state = state.clone();
                 justpic_backend::configure_api(cfg, state)
             })
+            .configure(justpic_backend::configure_api_docs)
     })
     .bind(config.host_addr())?
     .run()

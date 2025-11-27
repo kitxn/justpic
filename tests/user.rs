@@ -1,7 +1,7 @@
 use justpic_backend::database::schemas::users::User;
 
 #[tokio::test]
-async fn insert_user_into_db() {
+async fn insert_user_in_db() {
     let mut conn = justpic_backend::database::sqlite::open_in_memory_db()
         .await
         .unwrap();
@@ -23,4 +23,19 @@ async fn insert_user_into_db() {
         user.role(),
         justpic_backend::database::schemas::users::UserRole::Regular
     ));
+}
+
+#[tokio::test]
+async fn insert_many_users_in_db() {
+    todo!()
+}
+
+#[tokio::test]
+async fn insert_user_with_username_conflict_in_db() {
+    todo!()
+}
+
+#[tokio::test]
+async fn fetch_user_by_username() {
+    todo!()
 }

@@ -49,13 +49,13 @@ pub fn configure_api(cfg: &mut actix_web::web::ServiceConfig, state: state::Stat
 
 use actix_web::web;
 use utoipa::OpenApi;
-use utoipa_swagger_ui::SwaggerUi;
+use utoipa_rapidoc::RapiDoc;
 
 const DOC_JSON_URL: &str = "/api-docs/openapi.json";
-const SWAGGER_URL: &str = "/docs/{_:.*}";
+const DOC_UI_URL: &str = "/docs/{_:.*}";
 
 /// Configuring endpoints for API documentation
 pub fn configure_api_docs(cfg: &mut actix_web::web::ServiceConfig) {
     let open_api = docs::ApiDoc::openapi();
-    cfg.service(SwaggerUi::new(SWAGGER_URL).url(DOC_JSON_URL, open_api));
+    cfg.service(RapiDoc::with_openapi(DOC_JSON_URL, open_api).path(DOC_UI_URL));
 }

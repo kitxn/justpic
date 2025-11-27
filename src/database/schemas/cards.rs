@@ -1,10 +1,7 @@
 use chrono::{DateTime, Utc};
 use sqlx::prelude::FromRow;
 
-use crate::{
-    database::{DatabaseError, DatabasePool},
-    error::Error,
-};
+use crate::error::Error;
 
 #[derive(Debug, FromRow)]
 pub struct Card {
@@ -53,52 +50,6 @@ impl Card {
             is_private,
             state: CardState::Pending,
         }
-    }
-
-    /// Insert an entity into the databases
-    pub async fn insert(&self, pool: &DatabasePool) -> Result<(), DatabaseError> {
-        let mut tx = pool.begin().await?;
-        {
-            sqlx::query(
-                "INSERT INTO cards (
-                id, file_key, title, description, 
-                source_url, mimetype, filesize,
-                width, height, is_private, state
-              ) VALUES (
-                ?, ?, ?, ?,
-                ?, ?, ?,
-                ?, ?, ?, ?
-              )",
-            )
-            .bind(self.id)
-            .bind(&self.file_key)
-            .bind(&self.title)
-            .bind(&self.description)
-            .bind(&self.source_url)
-            .bind(&self.mimetype)
-            .bind(self.filesize)
-            .bind(self.width)
-            .bind(self.height)
-            .bind(self.is_private)
-            .bind(&self.state)
-            .execute(&mut *tx)
-            .await?;
-        }
-        tx.commit().await?;
-
-        tracing::info!("New card inserted: {}", &self.id);
-
-        Ok(())
-    }
-
-    /// Fetch a [`Card`] by its numeric ID
-    pub async fn fetch_by_id(id: u64, pool: &DatabasePool) -> Result<Option<Self>, DatabaseError> {
-        let card: Option<Card> = sqlx::query_as("SELECT * FROM cards WHERE id = ?")
-            .bind(id as i64)
-            .fetch_optional(pool)
-            .await?;
-
-        Ok(card)
     }
 
     /// Remove a card from the database

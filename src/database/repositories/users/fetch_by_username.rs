@@ -1,12 +1,12 @@
-use sqlx::query_as;
+use sqlx::{Executor, Sqlite, query_as};
 
-use crate::database::{DatabaseError, DatabasePool, schemas::users::User};
+use crate::database::schemas::users::User;
 
 /// Fetch [`User`] item by username
-pub async fn fetch_by_username(
-    username: &str,
-    pool: &DatabasePool,
-) -> Result<Option<User>, DatabaseError> {
+pub async fn fetch_by_username<'a, E>(username: &str, exec: E) -> Result<Option<User>, sqlx::Error>
+where
+    E: Executor<'a, Database = Sqlite>,
+{
     let item = query_as(
         "
             SELECT id, username, password, role, created
@@ -15,7 +15,7 @@ pub async fn fetch_by_username(
         ",
     )
     .bind(username.to_lowercase())
-    .fetch_optional(pool)
+    .fetch_optional(exec)
     .await?;
 
     Ok(item)
