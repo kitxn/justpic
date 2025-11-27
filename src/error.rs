@@ -43,6 +43,10 @@ pub enum Error {
     #[display("DB_ERROR: {_0}")]
     Database(sqlx::Error),
 
+    /// Cryptography error
+    #[display("CRYPTO_ERROR")]
+    CryptoError(bcrypt::BcryptError),
+
     /// File storage error
     #[display("STORAGE_ERROR: {_0}")]
     Storage(crate::storage::StorageError),
@@ -59,6 +63,21 @@ impl From<sqlx::Error> for Error {
         match value {
             sqlx::Error::RowNotFound => Error::ItemNotFound,
             _ => Error::Database(value),
+        }
+    }
+}
+
+impl From<bcrypt::BcryptError> for Error {
+    fn from(value: bcrypt::BcryptError) -> Self {
+        match value {
+            bcrypt::BcryptError::Io(error) => Error::from(error),
+            bcrypt::BcryptError::CostNotAllowed(..)
+            | bcrypt::BcryptError::InvalidCost(..)
+            | bcrypt::BcryptError::InvalidPrefix(..)
+            | bcrypt::BcryptError::InvalidSaltLen(..)
+            | bcrypt::BcryptError::InvalidBase64(..)
+            | bcrypt::BcryptError::InvalidHash(..) => Error::BadInput,
+            _ => Error::CryptoError(value),
         }
     }
 }

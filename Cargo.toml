@@ -37,6 +37,7 @@ base64 = "0.22.1"
 derive_more = { version = "2.0.1", features = ["from", "display"] }
 validator = "0.19"
 chrono = { version = "0.4.42" }
+bcrypt = "0.17.1"
 # Docs
 utoipa = { version = "5.4.0", features = ["actix_extras"] }
 # utoipa-swagger-ui = { version = "9.0.2", features = ["actix-web", "reqwest"] }
