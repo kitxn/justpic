@@ -1,10 +1,17 @@
 //! Justpic backend server
-// TODO: document the main components
 
 pub mod config;
 pub mod docs;
 pub mod error;
 pub mod state;
+
+pub mod auth;
+
+pub mod models;
+pub mod routes;
+
+pub mod traits;
+pub mod util;
 
 pub mod database;
 pub mod storage;
@@ -37,18 +44,19 @@ pub fn setup_logger() {
 
 /// Configuring API endpoints and DI
 pub fn configure_api(cfg: &mut actix_web::web::ServiceConfig, state: state::State) {
-    cfg.app_data(web::Data::new(state));
+    cfg.app_data(web::Data::new(state))
+        .configure(routes::config);
 }
 
 use actix_web::web;
 use utoipa::OpenApi;
-use utoipa_swagger_ui::SwaggerUi;
+use utoipa_rapidoc::RapiDoc;
 
 const DOC_JSON_URL: &str = "/api-docs/openapi.json";
-const SWAGGER_URL: &str = "/docs/{_:.*}";
+const DOC_UI_URL: &str = "/docs/{_:.*}";
 
 /// Configuring endpoints for API documentation
 pub fn configure_api_docs(cfg: &mut actix_web::web::ServiceConfig) {
     let open_api = docs::ApiDoc::openapi();
-    cfg.service(SwaggerUi::new(SWAGGER_URL).url(DOC_JSON_URL, open_api));
+    cfg.service(RapiDoc::with_openapi(DOC_JSON_URL, open_api).path(DOC_UI_URL));
 }

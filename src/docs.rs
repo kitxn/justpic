@@ -1,8 +1,15 @@
+use crate::routes;
 use utoipa::OpenApi;
 
 #[derive(OpenApi)]
 #[openapi(
     paths(
+      routes::files::get::get_file_stream,
+      
+      routes::users::fetch_by_username::fetch_by_username,
+      
+      routes::auth::register::register,
+      routes::auth::login::login
     ),
     info(
       title = "justpic-backend",
@@ -11,7 +18,10 @@ use utoipa::OpenApi;
     ),
     tags(
       (name = "auth", description = "Authentication endpoints"),
-      (name = "cards", description = "Cards management")
+      (name = "users", description = "Users endpoints"),
+      (name = "cards", description = "Cards management"),
+      (name = "files", description = "Files endpoints"),
+      (name = "system", description = "System endpoints")
     )
 )]
 pub struct ApiDoc;

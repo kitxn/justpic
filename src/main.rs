@@ -23,11 +23,11 @@ async fn main() -> Result<()> {
     tracing::info!("Running swagger doc on http://{}/docs/", config.host_addr());
     HttpServer::new(move || {
         App::new()
-            .configure(justpic_backend::configure_api_docs)
             .configure(|cfg| {
-                let state = state.to_owned();
+                let state = state.clone();
                 justpic_backend::configure_api(cfg, state)
             })
+            .configure(justpic_backend::configure_api_docs)
     })
     .bind(config.host_addr())?
     .run()
