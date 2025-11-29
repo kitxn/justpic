@@ -3,14 +3,14 @@ use sqlx::prelude::FromRow;
 
 #[derive(Debug, FromRow)]
 pub struct User {
-    pub(super) id: uuid::Uuid,
+    pub(crate) id: uuid::Uuid,
 
     pub(crate) username: String,
     pub(crate) password: String,
 
-    pub(super) role: UserRole,
+    pub(crate) role: UserRole,
 
-    pub(super) created: DateTime<Utc>,
+    pub(crate) created: DateTime<Utc>,
 }
 
 impl User {

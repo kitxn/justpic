@@ -35,6 +35,21 @@ pub enum Error {
     #[display("BAD_INPUT")]
     BadInput,
 
+    /// Invalid auth credentials
+    #[display("INVALID_CREDENTIALS")]
+    InvalidCredentials,
+
+    /// Dto validation failed
+    #[display("INVALID_INPUT_DATA: {message}")]
+    Validation {
+        field: &'static str,
+        message: &'static str,
+    },
+
+    /// Tokio tasks error
+    #[display("MULTI_TASKS_ERROR")]
+    MultiTasksError,
+
     /// IO error
     #[display("IO_ERROR: {_0}")]
     Io(std::io::Error),
@@ -58,10 +73,18 @@ impl From<sqlx::migrate::MigrateError> for Error {
     }
 }
 
+// TODO: Refactor this FROM impl
+impl From<tokio::task::JoinError> for Error {
+    fn from(_: tokio::task::JoinError) -> Self {
+        Error::MultiTasksError
+    }
+}
+
 impl From<sqlx::Error> for Error {
     fn from(value: sqlx::Error) -> Self {
         match value {
             sqlx::Error::RowNotFound => Error::ItemNotFound,
+            sqlx::Error::Database(e) if e.is_unique_violation() => Error::Conflict,
             _ => Error::Database(value),
         }
     }
@@ -108,6 +131,10 @@ impl actix_web::ResponseError for Error {
     fn status_code(&self) -> StatusCode {
         match self {
             Error::ItemNotFound | Error::ResourceNotFound => StatusCode::NOT_FOUND,
+            Error::BadInput | Error::Validation { .. } => StatusCode::BAD_REQUEST,
+            Error::AccessDenied => StatusCode::FORBIDDEN,
+            Error::Conflict => StatusCode::CONFLICT,
+            Error::InvalidCredentials => StatusCode::UNAUTHORIZED,
             _ => StatusCode::INTERNAL_SERVER_ERROR,
         }
     }
@@ -115,6 +142,7 @@ impl actix_web::ResponseError for Error {
     fn error_response(&self) -> HttpResponse {
         let code = self.status_code();
         let code_u16 = code.as_u16();
+
         HttpResponse::build(code).json(ApiError {
             code: code_u16,
             message: self.to_string(),

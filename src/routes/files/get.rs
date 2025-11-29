@@ -2,7 +2,7 @@ use actix_web::{HttpResponse, get, web};
 
 use crate::error::Result;
 
-/// Get a file stream by its ID
+/// Get a file by its ID
 #[utoipa::path(get, path = "/api/files/{id}", tag = "files")]
 #[get("/{id}")]
 pub async fn get_file_stream(

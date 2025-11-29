@@ -6,7 +6,7 @@ async fn insert_user_in_db() {
         .await
         .unwrap();
 
-    let user = User::new("john_doe".to_string(), "hunter42".to_string());
+    let user = User::new("john_doe".to_string(), "test-password".to_string());
     let id = user.id();
 
     justpic_backend::database::repositories::users::insert(&user, &mut conn)
@@ -27,15 +27,27 @@ async fn insert_user_in_db() {
 
 #[tokio::test]
 async fn insert_many_users_in_db() {
+    let mut conn = justpic_backend::database::sqlite::open_in_memory_db()
+        .await
+        .unwrap();
+
     todo!()
 }
 
 #[tokio::test]
 async fn insert_user_with_username_conflict_in_db() {
+    let mut conn = justpic_backend::database::sqlite::open_in_memory_db()
+        .await
+        .unwrap();
+
     todo!()
 }
 
 #[tokio::test]
 async fn fetch_user_by_username() {
+    let mut conn = justpic_backend::database::sqlite::open_in_memory_db()
+        .await
+        .unwrap();
+
     todo!()
 }

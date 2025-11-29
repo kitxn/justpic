@@ -10,6 +10,7 @@ pub mod auth;
 pub mod models;
 pub mod routes;
 
+pub mod traits;
 pub mod util;
 
 pub mod database;
