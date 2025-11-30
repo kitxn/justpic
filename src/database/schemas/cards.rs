@@ -1,10 +1,8 @@
 use chrono::{DateTime, Utc};
 use sqlx::prelude::FromRow;
 
-use crate::error::Error;
-
 #[derive(Debug, FromRow)]
-pub struct Card {
+pub struct DbCard {
     pub(super) id: i64,
     pub(super) file_key: String,
 
@@ -25,7 +23,7 @@ pub struct Card {
     pub(super) state: CardState,
 }
 
-impl Card {
+impl DbCard {
     /// Create a new [`Card`] entity
     pub fn new(
         title: Option<String>,
@@ -35,7 +33,7 @@ impl Card {
         filesize: i64,
         is_private: bool,
     ) -> Self {
-        Card {
+        DbCard {
             id: crate::util::unid::generate(),
             file_key: crate::util::file_key::generate(),
             mimetype,
@@ -50,11 +48,6 @@ impl Card {
             is_private,
             state: CardState::Pending,
         }
-    }
-
-    /// Remove a card from the database
-    pub async fn remove(&self) -> Result<(), Error> {
-        todo!()
     }
 }
 

@@ -2,7 +2,7 @@ use chrono::{DateTime, Utc};
 use serde::Serialize;
 use utoipa::ToSchema;
 
-use crate::database::schemas::users::User;
+use crate::database::schemas::users::DbUser;
 
 #[derive(Debug, Serialize, ToSchema)]
 pub struct UserResponse {
@@ -14,8 +14,8 @@ pub struct UserResponse {
     pub(super) created: DateTime<Utc>,
 }
 
-impl From<User> for UserResponse {
-    fn from(value: User) -> Self {
+impl From<DbUser> for UserResponse {
+    fn from(value: DbUser) -> Self {
         UserResponse {
             id: value.id,
             username: value.username,

@@ -2,7 +2,7 @@ use chrono::{DateTime, Utc};
 use sqlx::prelude::FromRow;
 
 #[derive(Debug, FromRow)]
-pub struct User {
+pub struct DbUser {
     pub(crate) id: uuid::Uuid,
 
     pub(crate) username: String,
@@ -13,9 +13,9 @@ pub struct User {
     pub(crate) created: DateTime<Utc>,
 }
 
-impl User {
+impl DbUser {
     pub fn new(username: String, password: String) -> Self {
-        User {
+        DbUser {
             id: uuid::Uuid::new_v4(),
             username: username.to_lowercase(),
             password,

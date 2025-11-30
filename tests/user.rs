@@ -1,4 +1,4 @@
-use justpic_backend::database::schemas::users::User;
+use justpic_backend::database::schemas::users::DbUser;
 
 #[tokio::test]
 async fn insert_user_in_db() {
@@ -6,7 +6,7 @@ async fn insert_user_in_db() {
         .await
         .unwrap();
 
-    let user = User::new("john_doe".to_string(), "test-password".to_string());
+    let user = DbUser::new("john_doe".to_string(), "test-password".to_string());
     let id = user.id();
 
     justpic_backend::database::repositories::users::insert(&user, &mut conn)

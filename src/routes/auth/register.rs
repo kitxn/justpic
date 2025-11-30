@@ -4,7 +4,7 @@ use actix_web::{
 };
 
 use crate::{
-    database::{repositories, schemas::users::User},
+    database::{repositories, schemas::users::DbUser},
     error::{Error, Result},
     models::auth::register::{RegisterRequestData, RegisterResponseData},
     traits::validation::Validatable,
@@ -43,7 +43,7 @@ pub async fn register(
     let hashed_password =
         tokio::task::spawn_blocking(move || util::crypto::bcrypt_hash(&password)).await??;
 
-    let user = User::new(username.clone(), hashed_password);
+    let user = DbUser::new(username.clone(), hashed_password);
     repositories::users::insert(&user, state.db())
         .await
         .map_err(|e| match e {
