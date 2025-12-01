@@ -1,15 +1,16 @@
-use actix_web::{HttpResponse, get, web};
+use actix_web::{HttpRequest, HttpResponse, get, web};
 
 use crate::{
+    auth::sessions::extract_session_from_cookie,
     database::repositories,
     error::{Error, Result},
     models::users::UserResponse,
 };
 
-/// Fetch user by its username
+/// Fetch user by session
 #[utoipa::path(
     get, 
-    path = "/api/users/by-name/{username}", 
+    path = "/api/users/me", 
     tag = "users", 
     responses(
         (
@@ -21,12 +22,16 @@ use crate::{
         ),
     )
 )]
-#[get("/by-name/{username}")]
-pub async fn fetch_by_username(
+#[get("/me")]
+pub async fn fetch_by_session(
+    req: HttpRequest,
     state: web::Data<crate::state::State>,
-    username: web::Path<String>,
 ) -> Result<HttpResponse> {
-    let user = repositories::users::fetch_by_username(&username, state.db())
+    let session = extract_session_from_cookie(&req, state.db())
+        .await?
+        .ok_or(Error::AccessDenied)?;
+
+    let user = repositories::users::fetch_by_id(&session.owner_id, state.db())
         .await?
         .ok_or(Error::ItemNotFound)?;
 
