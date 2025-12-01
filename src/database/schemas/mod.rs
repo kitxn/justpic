@@ -1,3 +1,5 @@
+//! Database schemas
+
 pub mod cards;
 
 pub mod sessions;
