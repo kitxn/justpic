@@ -32,4 +32,12 @@ impl DbSession {
     pub fn is_expired(&self) -> bool {
         self.expires >= Utc::now()
     }
+
+    pub fn id(&self) -> uuid::Uuid {
+        self.id
+    }
+
+    pub fn owner_id(&self) -> uuid::Uuid {
+        self.owner_id
+    }
 }

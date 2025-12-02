@@ -7,7 +7,6 @@ use crate::{
     models::users::UserResponse,
 };
 
-/// Fetch user by session
 #[utoipa::path(
     get, 
     path = "/api/users/me", 

@@ -1,17 +1,21 @@
 use actix_web::{
-    HttpResponse, post,
+    HttpRequest, HttpResponse, post,
     web::{self, Json},
 };
 
 use crate::{
-    database::{repositories, schemas::users::DbUser},
+    auth::sessions::{create_session_cookie, extract_session_from_cookie},
+    database::{
+        repositories,
+        schemas::{sessions::DbSession, users::DbUser},
+    },
     error::{Error, Result},
     models::auth::register::{RegisterRequestData, RegisterResponseData},
     traits::validation::Validatable,
     util,
 };
 
-/// Register new user
+
 #[utoipa::path(
     post, 
     path = "/api/auth/register", 
@@ -30,9 +34,17 @@ use crate::{
 )]
 #[post("/register")]
 pub async fn register(
+    req: HttpRequest,
     state: web::Data<crate::state::State>,
     payload: Json<RegisterRequestData>,
 ) -> Result<HttpResponse> {
+    if extract_session_from_cookie(&req, state.db())
+        .await?
+        .is_some()
+    {
+        return Err(Error::Conflict);
+    }
+
     payload.validate()?;
 
     let payload = payload.into_inner();
@@ -51,8 +63,15 @@ pub async fn register(
             _ => Error::from(e),
         })?;
 
-    Ok(HttpResponse::Created().json(RegisterResponseData {
-        message: "Registered",
-        username,
-    }))
+    let session = DbSession::new(user.id, None);
+    repositories::sessions::insert(&session, state.db()).await?;
+
+    let cookie = create_session_cookie(&session);
+
+    Ok(HttpResponse::Created()
+        .cookie(cookie)
+        .json(RegisterResponseData {
+            message: "Registered",
+            username,
+        }))
 }

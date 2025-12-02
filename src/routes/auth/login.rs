@@ -11,7 +11,6 @@ use crate::{
     traits::validation::Validatable,
 };
 
-/// Login
 #[utoipa::path(
     post, 
     path = "/api/auth/login", 
@@ -21,10 +20,15 @@ use crate::{
         (
             status = 200, 
             body = UserResponse,
-            description = "Successful login"),
+            description = "Successful login"
+        ),
         (
             status = 401, 
             description = "Invalid login credentials"
+        ),
+        (
+            status = 409, 
+            description = "Already logged in"
         ),
     )
 )]

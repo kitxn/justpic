@@ -6,7 +6,6 @@ use crate::{
     models::users::UserResponse,
 };
 
-/// Fetch user by its username
 #[utoipa::path(
     get, 
     path = "/api/users/by-name/{username}", 
