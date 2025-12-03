@@ -10,7 +10,8 @@ use utoipa::OpenApi;
       routes::users::fetch_by_session::fetch_by_session,
       
       routes::auth::register::register,
-      routes::auth::login::login
+      routes::auth::login::login,
+      routes::auth::logout::logout
     ),
     info(
       title = "justpic-backend",

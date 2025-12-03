@@ -16,8 +16,7 @@ use crate::{
             status = 200,
         ),
         (
-            status = 404, 
-            description = "User not found"
+            status = 401, 
         ),
     )
 )]
@@ -26,13 +25,15 @@ pub async fn fetch_by_session(
     req: HttpRequest,
     state: web::Data<crate::state::State>,
 ) -> Result<HttpResponse> {
+    // TODO: OPT DB queries via JOIN
+
     let session = extract_session_from_cookie(&req, state.db())
         .await?
-        .ok_or(Error::AccessDenied)?;
+        .ok_or(Error::Unauthorized)?;
 
     let user = repositories::users::fetch_by_id(&session.owner_id, state.db())
         .await?
-        .ok_or(Error::ItemNotFound)?;
+        .ok_or(Error::Unauthorized)?;
 
     let res = UserResponse::from(user);
     Ok(HttpResponse::Ok().json(res))
