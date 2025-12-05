@@ -52,3 +52,9 @@ pub enum UserRole {
     #[display("admin")]
     Admin,
 }
+
+impl UserRole {
+    pub fn is_admin(&self) -> bool {
+        matches!(self, UserRole::Admin)
+    }
+}

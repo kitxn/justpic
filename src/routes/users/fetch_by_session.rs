@@ -14,9 +14,11 @@ use crate::{
     responses(
         (
             status = 200,
+            description = "Current authorized user",
         ),
         (
             status = 401, 
+            description = "Client is not authorized"
         ),
     )
 )]
