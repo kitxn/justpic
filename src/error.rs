@@ -17,6 +17,10 @@ pub enum Error {
     #[display("RESOURCE_NOT_FOUND")]
     ResourceNotFound,
 
+    /// The user is not authorized in the system
+    #[display("UNAUTHORIZED")]
+    Unauthorized,
+
     /// The sought object was not found
     ///
     /// (for example, the sought profile)
@@ -134,7 +138,7 @@ impl actix_web::ResponseError for Error {
             Error::BadInput | Error::Validation { .. } => StatusCode::BAD_REQUEST,
             Error::AccessDenied => StatusCode::FORBIDDEN,
             Error::Conflict => StatusCode::CONFLICT,
-            Error::InvalidCredentials => StatusCode::UNAUTHORIZED,
+            Error::InvalidCredentials | Error::Unauthorized => StatusCode::UNAUTHORIZED,
             _ => StatusCode::INTERNAL_SERVER_ERROR,
         }
     }

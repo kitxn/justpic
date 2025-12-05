@@ -7,9 +7,11 @@ use utoipa::OpenApi;
       routes::files::get::get_file_stream,
       
       routes::users::fetch_by_username::fetch_by_username,
+      routes::users::fetch_by_session::fetch_by_session,
       
       routes::auth::register::register,
-      routes::auth::login::login
+      routes::auth::login::login,
+      routes::auth::logout::logout
     ),
     info(
       title = "justpic-backend",

@@ -6,10 +6,9 @@ use crate::{
     models::users::UserResponse,
 };
 
-/// Fetch user by its username
 #[utoipa::path(
     get, 
-    path = "/api/users/{username}", 
+    path = "/api/users/by-name/{username}", 
     tag = "users", 
     responses(
         (
@@ -21,7 +20,7 @@ use crate::{
         ),
     )
 )]
-#[get("/{username}")]
+#[get("/by-name/{username}")]
 pub async fn fetch_by_username(
     state: web::Data<crate::state::State>,
     username: web::Path<String>,
