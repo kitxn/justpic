@@ -1,4 +1,5 @@
 pub mod change_password;
+pub mod change_username;
 
 use chrono::{DateTime, Utc};
 use serde::Serialize;

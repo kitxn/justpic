@@ -1,8 +1,7 @@
 use actix_web::{HttpRequest, HttpResponse, get, web};
 
 use crate::{
-    auth::sessions::extract_session_from_cookie,
-    database::repositories,
+    auth::sessions::extract_user_from_cookie,
     error::{Error, Result},
     models::users::UserResponse,
 };
@@ -27,13 +26,7 @@ pub async fn fetch_by_session(
     req: HttpRequest,
     state: web::Data<crate::state::State>,
 ) -> Result<HttpResponse> {
-    // TODO: OPT DB queries via JOIN
-
-    let session = extract_session_from_cookie(&req, state.db())
-        .await?
-        .ok_or(Error::Unauthorized)?;
-
-    let user = repositories::users::fetch_by_id(&session.owner_id, state.db())
+    let user = extract_user_from_cookie(&req, state.db())
         .await?
         .ok_or(Error::Unauthorized)?;
 

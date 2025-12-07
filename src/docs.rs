@@ -10,6 +10,7 @@ use utoipa::OpenApi;
       routes::users::fetch_by_session::fetch_by_session,
 
       routes::users::change_password::change_password,
+      routes::users::change_username::change_username,
       
       routes::auth::register::register,
       routes::auth::login::login,

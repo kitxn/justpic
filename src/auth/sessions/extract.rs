@@ -3,23 +3,45 @@ use uuid::Uuid;
 
 use crate::{
     SESSION_COOKIE_NAME,
-    database::{DatabasePool, repositories, schemas::sessions::DbSession},
-    error::Result,
+    database::{
+        DatabasePool, repositories,
+        schemas::{sessions::DbSession, users::DbUser},
+    },
+    error::{Error, Result},
 };
 
-// TODO: Add user retrieval by session via join to avoid 2 requests at a time
+fn parse_session_key_from_cookie(req: &HttpRequest) -> Result<Option<Uuid>> {
+    if let Some(s) = req.cookie(SESSION_COOKIE_NAME) {
+        let Ok(key) = Uuid::parse_str(s.value()) else {
+            tracing::warn!("A session with an invalid key was received: {}", s.value());
+            return Err(Error::Unauthorized);
+        };
+        return Ok(Some(key));
+    }
+    Ok(None)
+}
+
 pub async fn extract_session_from_cookie(
     req: &HttpRequest,
     db: &DatabasePool,
 ) -> Result<Option<DbSession>> {
-    match req.cookie(SESSION_COOKIE_NAME) {
-        Some(s) => {
-            let Ok(key) = Uuid::parse_str(s.value()) else {
-                return Ok(None);
-            };
-
+    match parse_session_key_from_cookie(req)? {
+        Some(key) => {
             let session = repositories::sessions::fetch_by_id(&key, db).await?;
             Ok(session)
+        }
+        None => Ok(None),
+    }
+}
+
+pub async fn extract_user_from_cookie(
+    req: &HttpRequest,
+    db: &DatabasePool,
+) -> Result<Option<DbUser>> {
+    match parse_session_key_from_cookie(req)? {
+        Some(key) => {
+            let user = repositories::users::fetch_by_session_id(&key, db).await?;
+            Ok(user)
         }
         None => Ok(None),
     }

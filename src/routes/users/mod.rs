@@ -14,6 +14,7 @@ pub fn config(cfg: &mut web::ServiceConfig) {
         web::scope("/users")
             .service(fetch_by_session::fetch_by_session)
             .service(fetch_by_username::fetch_by_username)
-            .service(change_password::change_password),
+            .service(change_password::change_password)
+            .service(change_username::change_username),
     );
 }

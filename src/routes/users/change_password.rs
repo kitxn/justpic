@@ -11,7 +11,6 @@ use crate::{
     util,
 };
 
-
 #[utoipa::path(
     patch, 
     path = "/api/users/me/password", 
@@ -41,16 +40,14 @@ pub async fn change_password(
     let session = extract_session_from_cookie(&req, state.db())
         .await?
         .ok_or(Error::Unauthorized)?;
-    let user = repositories::users::fetch_by_id(&session.owner_id, state.db())
-        .await?
-        .ok_or(Error::AccessDenied)?;
 
     let hashed_password =
         tokio::task::spawn_blocking(move || util::crypto::bcrypt_hash(&payload.new_password))
             .await??;
 
     let query_res =
-        repositories::users::change_password(user.id(), &hashed_password, state.db()).await?;
+        repositories::users::change_password(&session.owner_id(), &hashed_password, state.db())
+            .await?;
 
     if query_res.rows_affected() == 0 {
         // TODO: change error type
