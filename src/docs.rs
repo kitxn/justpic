@@ -8,6 +8,8 @@ use utoipa::OpenApi;
       
       routes::users::fetch_by_username::fetch_by_username,
       routes::users::fetch_by_session::fetch_by_session,
+
+      routes::users::change_password::change_password,
       
       routes::auth::register::register,
       routes::auth::login::login,

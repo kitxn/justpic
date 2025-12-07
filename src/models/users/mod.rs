@@ -1,3 +1,5 @@
+pub mod change_password;
+
 use chrono::{DateTime, Utc};
 use serde::Serialize;
 use utoipa::ToSchema;

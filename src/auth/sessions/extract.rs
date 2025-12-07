@@ -7,6 +7,7 @@ use crate::{
     error::Result,
 };
 
+// TODO: Add user retrieval by session via join to avoid 2 requests at a time
 pub async fn extract_session_from_cookie(
     req: &HttpRequest,
     db: &DatabasePool,
