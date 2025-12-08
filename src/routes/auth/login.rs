@@ -7,7 +7,7 @@ use crate::{
     auth::sessions::{create_session_cookie, extract_session_from_cookie},
     database::{repositories, schemas::sessions::DbSession},
     error::{Error, Result},
-    models::{auth::login::UserLoginRequest, users::UserPublicModel},
+    models::{auth::login::UserLoginRequest, users::responses::common::UserPublic},
     traits::validation::Validatable,
 };
 
@@ -20,7 +20,7 @@ use crate::{
     responses(
         (
             status = 200, 
-            body = UserPublicModel,
+            body = UserPublic,
             description = "Successful login"
         ),
         (
@@ -54,16 +54,17 @@ pub async fn login(
 
     // TODO: move password checking in other task
     let is_valid_password =
-        crate::util::crypto::bcrypt_validate(&payload.password, &user.password)?;
+        crate::util::crypto::bcrypt_validate(&payload.password, user.password())?;
     if !is_valid_password {
         return Err(Error::InvalidCredentials);
     }
 
     // TODO: add user agent getting
-    let session = DbSession::new(user.id, None);
+    let session = DbSession::new(*user.id(), None);
     repositories::sessions::insert(&session, state.db()).await?;
 
     let cookie = create_session_cookie(&session);
-    let res = UserPublicModel::from(user);
-    Ok(HttpResponse::Ok().cookie(cookie).json(res))
+    Ok(HttpResponse::Ok()
+        .cookie(cookie)
+        .json(user.to_public_model()))
 }

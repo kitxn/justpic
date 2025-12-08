@@ -3,11 +3,9 @@ use uuid::Uuid;
 
 use crate::{
     SESSION_COOKIE_NAME,
-    database::{
-        DatabasePool, repositories,
-        schemas::{sessions::DbSession, users::DbUser},
-    },
+    database::{DatabasePool, repositories, schemas::sessions::DbSession},
     error::{Error, Result},
+    models::users::User,
 };
 
 fn parse_session_key_from_cookie(req: &HttpRequest) -> Result<Option<Uuid>> {
@@ -37,7 +35,7 @@ pub async fn extract_session_from_cookie(
 pub async fn extract_user_from_cookie(
     req: &HttpRequest,
     db: &DatabasePool,
-) -> Result<Option<DbUser>> {
+) -> Result<Option<User>> {
     match parse_session_key_from_cookie(req)? {
         Some(key) => {
             let user = repositories::users::fetch_by_session_id(&key, db).await?;

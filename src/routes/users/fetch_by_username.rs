@@ -2,8 +2,7 @@ use actix_web::{HttpResponse, get, web};
 
 use crate::{
     database::repositories,
-    error::{Error, Result},
-    models::users::UserPublicModel,
+    error::{Error, Result}, models::users::responses::common::UserPublic,
 };
 
 #[utoipa::path(
@@ -14,7 +13,7 @@ use crate::{
     responses(
         (
             status = 200,
-            body = UserPublicModel,
+            body = UserPublic,
             description = "Information about the user with given username",
         ),
         (
@@ -32,6 +31,5 @@ pub async fn fetch_by_username(
         .await?
         .ok_or(Error::ItemNotFound)?;
 
-    let res = UserPublicModel::from(user);
-    Ok(HttpResponse::Ok().json(res))
+    Ok(HttpResponse::Ok().json(user.to_public_model()))
 }

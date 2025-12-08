@@ -4,7 +4,7 @@ use utoipa::ToSchema;
 use crate::traits::validation::Validatable;
 
 #[derive(Debug, Deserialize, ToSchema)]
-pub struct UserRegisterRequest {
+pub struct UserCreateRequest {
     #[schema(example = "john_doe")]
     pub username: String,
 
@@ -16,7 +16,7 @@ pub struct UserRegisterRequest {
 }
 
 // TODO: Cover validation with tests
-impl Validatable for UserRegisterRequest {
+impl Validatable for UserCreateRequest {
     fn validate(&self) -> Result<(), crate::error::Error> {
         if self.password != self.password_confirmation {
             return Err(crate::error::Error::Validation {

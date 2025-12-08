@@ -4,11 +4,7 @@ use actix_web::{
 };
 
 use crate::{
-    auth::sessions::extract_session_from_cookie,
-    database::repositories,
-    error::{Error, Result},
-    models::users::change_username::UserChangeUsernameRequest,
-    traits::validation::Validatable,
+    auth::sessions::extract_session_from_cookie, database::repositories, error::{Error, Result}, models::users::requests::UserChangeUsernameRequest, traits::validation::Validatable
 };
 
 #[utoipa::path(
