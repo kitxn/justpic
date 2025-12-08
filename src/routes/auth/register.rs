@@ -10,7 +10,7 @@ use crate::{
         schemas::{sessions::DbSession, users::DbUser},
     },
     error::{Error, Result},
-    models::auth::register::{RegisterRequestData, RegisterResponseData},
+    models::{auth::register::UserRegisterRequest, users::UserPublicModel},
     traits::validation::Validatable,
     util,
 };
@@ -18,13 +18,14 @@ use crate::{
 
 #[utoipa::path(
     post, 
-    path = "/api/auth/register", 
+    description = "Register a new account",
+    path = "/auth/register", 
     tag = "auth", 
-    request_body = RegisterRequestData,
+    request_body = UserRegisterRequest,
     responses(
         (
             status = 201, 
-            body = RegisterResponseData,
+            body = UserPublicModel,
             description = "Successful registration"),
         (
             status = 400, 
@@ -36,7 +37,7 @@ use crate::{
 pub async fn register(
     req: HttpRequest,
     state: web::Data<crate::state::State>,
-    payload: Json<RegisterRequestData>,
+    payload: Json<UserRegisterRequest>,
 ) -> Result<HttpResponse> {
     if extract_session_from_cookie(&req, state.db())
         .await?
@@ -66,12 +67,11 @@ pub async fn register(
     let session = DbSession::new(user.id, None);
     repositories::sessions::insert(&session, state.db()).await?;
 
+    let res = UserPublicModel::from(user);
+
     let cookie = create_session_cookie(&session);
 
     Ok(HttpResponse::Created()
         .cookie(cookie)
-        .json(RegisterResponseData {
-            message: "Registered",
-            username,
-        }))
+        .json(res))
 }

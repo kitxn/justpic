@@ -4,24 +4,15 @@ use utoipa::ToSchema;
 use crate::traits::validation::Validatable;
 
 #[derive(Debug, Deserialize, ToSchema)]
-pub struct UserLoginRequest {
-    #[schema(example = "john_doe")]
-    pub username: String,
-
+#[serde(rename_all = "camelCase")]
+pub struct UserDeleteAccountRequest {
     #[schema(example = "hunter42!")]
     pub password: String,
 }
 
-impl Validatable for UserLoginRequest {
+impl Validatable for UserDeleteAccountRequest {
     fn validate(&self) -> Result<(), crate::error::Error> {
-        if self.username.len() > 42 {
-            return Err(crate::error::Error::Validation {
-                field: "username",
-                message: "Incorrect username length (3-42 characters required)",
-            });
-        }
-
-        if self.password.len() > 72 {
+        if !(8..72).contains(&self.password.len()) {
             return Err(crate::error::Error::Validation {
                 field: "password",
                 message: "Incorrect password length (8-72 characters required)",
