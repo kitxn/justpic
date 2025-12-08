@@ -5,9 +5,9 @@ use actix_web::{
 
 use crate::{
     auth::sessions::{create_session_cookie, extract_session_from_cookie},
-    database::{repositories, schemas::sessions::DbSession},
+    database::repositories,
     error::{Error, Result},
-    models::{auth::login::UserLoginRequest, users::responses::common::UserPublic},
+    models::{sessions::{Session, requests::create::SessionCreateRequest}, users::responses::common::UserPublic},
     traits::validation::Validatable,
 };
 
@@ -16,7 +16,7 @@ use crate::{
     description = "Log in to account",
     path = "/auth/login", 
     tag = "auth", 
-    request_body = UserLoginRequest,
+    request_body = SessionCreateRequest,
     responses(
         (
             status = 200, 
@@ -37,7 +37,7 @@ use crate::{
 pub async fn login(
     req: HttpRequest,
     state: web::Data<crate::state::State>,
-    payload: Json<UserLoginRequest>,
+    payload: Json<SessionCreateRequest>,
 ) -> Result<HttpResponse> {
     if extract_session_from_cookie(&req, state.db())
         .await?
@@ -60,7 +60,7 @@ pub async fn login(
     }
 
     // TODO: add user agent getting
-    let session = DbSession::new(*user.id(), None);
+    let session = Session::new(user.id_copy());
     repositories::sessions::insert(&session, state.db()).await?;
 
     let cookie = create_session_cookie(&session);

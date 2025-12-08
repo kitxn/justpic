@@ -19,6 +19,10 @@ impl User {
         &self.id
     }
 
+    pub fn id_copy(&self) -> uuid::Uuid {
+        self.id
+    }
+
     pub fn username(&self) -> &str {
         &self.username
     }

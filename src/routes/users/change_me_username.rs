@@ -36,9 +36,7 @@ pub async fn change_me_username(
         .await?
         .ok_or(Error::Unauthorized)?;
 
-    let user_id = session.owner_id();
-
-    let res = repositories::users::change_username(&user_id, &payload.username, state.db())
+    let res = repositories::users::change_username(session.owner_id(), &payload.username, state.db())
         .await
         .map_err(|e| match e {
             sqlx::Error::Database(e) if e.is_unique_violation() => Error::BadInput,

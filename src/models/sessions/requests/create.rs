@@ -4,7 +4,7 @@ use utoipa::ToSchema;
 use crate::traits::validation::Validatable;
 
 #[derive(Debug, Deserialize, ToSchema)]
-pub struct UserLoginRequest {
+pub struct SessionCreateRequest {
     #[schema(example = "john_doe")]
     pub username: String,
 
@@ -12,7 +12,7 @@ pub struct UserLoginRequest {
     pub password: String,
 }
 
-impl Validatable for UserLoginRequest {
+impl Validatable for SessionCreateRequest {
     fn validate(&self) -> Result<(), crate::error::Error> {
         if self.username.len() > 42 {
             return Err(crate::error::Error::Validation {

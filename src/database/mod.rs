@@ -1,5 +1,4 @@
 pub mod repositories;
-pub mod schemas;
 
 pub mod sqlite;
 

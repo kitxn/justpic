@@ -39,11 +39,10 @@ pub async fn change_me_password(
             .await??;
 
     let query_res =
-        repositories::users::change_password(&session.owner_id(), &hashed_password, state.db())
+        repositories::users::change_password(session.owner_id(), &hashed_password, state.db())
             .await?;
 
     if query_res.rows_affected() == 0 {
-        // TODO: change error type
         return Err(Error::Unauthorized);
     }
 

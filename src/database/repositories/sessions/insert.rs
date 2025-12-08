@@ -1,8 +1,8 @@
 use sqlx::{Executor, Sqlite, sqlite::SqliteQueryResult};
 
-use crate::database::schemas::sessions::DbSession;
+use crate::models::sessions::Session;
 
-pub async fn insert<'a, E>(item: &DbSession, exec: E) -> Result<SqliteQueryResult, sqlx::Error>
+pub async fn insert<'a, E>(item: &Session, exec: E) -> Result<SqliteQueryResult, sqlx::Error>
 where
     E: Executor<'a, Database = Sqlite>,
 {
@@ -15,11 +15,11 @@ where
             )
           ",
     )
-    .bind(item.id)
-    .bind(item.owner_id)
-    .bind(&item.agent)
-    .bind(item.created)
-    .bind(item.expires)
+    .bind(item.id())
+    .bind(item.owner_id())
+    .bind(item.agent())
+    .bind(item.created())
+    .bind(item.expires())
     .execute(exec)
     .await?;
 

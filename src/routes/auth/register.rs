@@ -5,10 +5,10 @@ use actix_web::{
 
 use crate::{
     auth::sessions::{create_session_cookie, extract_session_from_cookie},
-    database::{repositories, schemas::sessions::DbSession},
+    database::repositories,
     error::{Error, Result},
-    models::
-        users::{User, requests::UserCreateRequest, responses::common::UserPublic}
+    models::{sessions::Session, 
+        users::{User, requests::UserCreateRequest, responses::common::UserPublic}}
     ,
     traits::validation::Validatable,
     util,
@@ -61,7 +61,7 @@ pub async fn register(
             _ => Error::from(e),
         })?;
 
-    let session = DbSession::new(*user.id(), None);
+    let session = Session::new(user.id_copy());
     repositories::sessions::insert(&session, state.db()).await?;
 
     let cookie = create_session_cookie(&session);

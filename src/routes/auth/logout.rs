@@ -32,7 +32,7 @@ pub async fn logout(
         .await?
         .ok_or(Error::Unauthorized)?;
 
-    repositories::sessions::remove(&session.id(), state.db()).await?;
+    repositories::sessions::remove(session.id(), state.db()).await?;
 
     let cookie = remove_session_cookie();
     Ok(HttpResponse::NoContent().cookie(cookie).finish())

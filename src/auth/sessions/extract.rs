@@ -3,9 +3,9 @@ use uuid::Uuid;
 
 use crate::{
     SESSION_COOKIE_NAME,
-    database::{DatabasePool, repositories, schemas::sessions::DbSession},
+    database::{DatabasePool, repositories},
     error::{Error, Result},
-    models::users::User,
+    models::{sessions::Session, users::User},
 };
 
 fn parse_session_key_from_cookie(req: &HttpRequest) -> Result<Option<Uuid>> {
@@ -14,15 +14,18 @@ fn parse_session_key_from_cookie(req: &HttpRequest) -> Result<Option<Uuid>> {
             tracing::warn!("A session with an invalid key was received: {}", s.value());
             return Err(Error::Unauthorized);
         };
+
         return Ok(Some(key));
     }
     Ok(None)
 }
 
+// TODO: add session expiration checking
+
 pub async fn extract_session_from_cookie(
     req: &HttpRequest,
     db: &DatabasePool,
-) -> Result<Option<DbSession>> {
+) -> Result<Option<Session>> {
     match parse_session_key_from_cookie(req)? {
         Some(key) => {
             let session = repositories::sessions::fetch_by_id(&key, db).await?;
