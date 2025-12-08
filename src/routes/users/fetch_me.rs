@@ -3,26 +3,28 @@ use actix_web::{HttpRequest, HttpResponse, get, web};
 use crate::{
     auth::sessions::extract_user_from_cookie,
     error::{Error, Result},
-    models::users::UserResponse,
+    models::users::UserPublicModel,
 };
 
 #[utoipa::path(
     get, 
-    path = "/api/users/me", 
-    tag = "users", 
+    description = "Get information about an authenticated user",
+    path = "/users/me", 
+    tag = "users.me", 
     responses(
         (
             status = 200,
-            description = "Current authorized user",
+            body = UserPublicModel,
+            description = "Authenticated user information",
         ),
         (
             status = 401, 
-            description = "Client is not authorized"
+            description = "Unauthorized"
         ),
     )
 )]
 #[get("/me")]
-pub async fn fetch_by_session(
+pub async fn fetch_me(
     req: HttpRequest,
     state: web::Data<crate::state::State>,
 ) -> Result<HttpResponse> {
@@ -30,6 +32,6 @@ pub async fn fetch_by_session(
         .await?
         .ok_or(Error::Unauthorized)?;
 
-    let res = UserResponse::from(user);
+    let res = UserPublicModel::from(user);
     Ok(HttpResponse::Ok().json(res))
 }

@@ -4,13 +4,12 @@ use utoipa::ToSchema;
 use crate::traits::validation::Validatable;
 
 #[derive(Debug, Deserialize, ToSchema)]
-#[serde(rename_all = "camelCase")]
-pub struct ChangePasswordRequestData {
+pub struct UserChangePasswordRequest {
     #[schema(example = "hunter52!")]
     pub new_password: String,
 }
 
-impl Validatable for ChangePasswordRequestData {
+impl Validatable for UserChangePasswordRequest {
     fn validate(&self) -> Result<(), crate::error::Error> {
         // TODO: Add password complexity checking
         if !(8..72).contains(&self.new_password.len()) {

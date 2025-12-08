@@ -21,3 +21,5 @@ pub use fetch_by_session_id::fetch_by_session_id;
 
 pub use update_password::change_password;
 pub use update_username::change_username;
+
+pub use delete::delete_by_id;

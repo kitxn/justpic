@@ -7,15 +7,16 @@ use crate::{
     auth::sessions::extract_session_from_cookie,
     database::repositories,
     error::{Error, Result},
-    models::users::change_password::ChangePasswordRequestData,
+    models::users::change_password::UserChangePasswordRequest,
     util,
 };
 
 #[utoipa::path(
-    patch, 
-    path = "/api/users/me/password", 
-    tag = "users", 
-    request_body = ChangePasswordRequestData,
+    patch,
+    description = "Change password for an authenticated user",
+    path = "/users/me/password", 
+    tag = "users.me", 
+    request_body = UserChangePasswordRequest,
     responses(
         (
             status = 204,
@@ -23,19 +24,15 @@ use crate::{
         ),
         (
             status = 401, 
-            description = "Client is not authorized"
-        ),
-        (
-            status = 404, 
-            description = "User not found"
+            description = "Unauthorized"
         ),
     )
 )]
 #[patch("/me/password")]
-pub async fn change_password(
+pub async fn change_me_password(
     req: HttpRequest,
     state: web::Data<crate::state::State>,
-    payload: Json<ChangePasswordRequestData>,
+    payload: Json<UserChangePasswordRequest>,
 ) -> Result<HttpResponse> {
     let session = extract_session_from_cookie(&req, state.db())
         .await?
@@ -51,7 +48,7 @@ pub async fn change_password(
 
     if query_res.rows_affected() == 0 {
         // TODO: change error type
-        return Err(Error::ItemNotFound);
+        return Err(Error::Unauthorized);
     }
 
     Ok(HttpResponse::NoContent().finish())

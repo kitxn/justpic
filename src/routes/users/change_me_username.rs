@@ -7,15 +7,16 @@ use crate::{
     auth::sessions::extract_session_from_cookie,
     database::repositories,
     error::{Error, Result},
-    models::users::change_username::ChangeUsernameRequestData,
+    models::users::change_username::UserChangeUsernameRequest,
     traits::validation::Validatable,
 };
 
 #[utoipa::path(
     patch, 
-    path = "/api/users/me/username", 
-    tag = "users", 
-    request_body = ChangeUsernameRequestData,
+    description = "Change username for an authenticated user",
+    path = "/users/me/username", 
+    tag = "users.me", 
+    request_body = UserChangeUsernameRequest,
     responses(
         (
             status = 204,
@@ -23,19 +24,15 @@ use crate::{
         ),
         (
             status = 401, 
-            description = "Client is not authorized"
-        ),
-        (
-            status = 404, 
-            description = "User not found"
+            description = "Unauthorized"
         ),
     )
 )]
 #[patch("/me/username")]
-pub async fn change_username(
+pub async fn change_me_username(
     req: HttpRequest,
     state: web::Data<crate::state::State>,
-    payload: Json<ChangeUsernameRequestData>,
+    payload: Json<UserChangeUsernameRequest>,
 ) -> Result<HttpResponse> {
     payload.validate()?;
 

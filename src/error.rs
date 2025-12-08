@@ -1,6 +1,6 @@
 use actix_web::{HttpResponse, http::StatusCode};
 
-use crate::models::error::ApiError;
+use crate::models::error::CommonResponseError;
 
 /// Error type for the application
 ///
@@ -147,7 +147,7 @@ impl actix_web::ResponseError for Error {
         let code = self.status_code();
         let code_u16 = code.as_u16();
 
-        HttpResponse::build(code).json(ApiError {
+        HttpResponse::build(code).json(CommonResponseError {
             code: code_u16,
             message: self.to_string(),
         })

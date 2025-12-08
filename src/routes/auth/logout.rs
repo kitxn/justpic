@@ -9,16 +9,17 @@ use crate::{
 
 #[utoipa::path(
     post, 
-    path = "/api/auth/logout", 
+    description = "End the current session",
+    path = "/auth/logout", 
     tag = "auth", 
     responses(
         (
             status = 204, 
-            description = "Successful logout"
+            description = "Successful account logout"
         ),
         (
             status = 401, 
-            description = "Invalid login credentials"
+            description = "The user is not logged in yet"
         ),
     )
 )]

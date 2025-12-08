@@ -7,19 +7,20 @@ use crate::{
     auth::sessions::{create_session_cookie, extract_session_from_cookie},
     database::{repositories, schemas::sessions::DbSession},
     error::{Error, Result},
-    models::{auth::login::LoginRequestData, users::UserResponse},
+    models::{auth::login::UserLoginRequest, users::UserPublicModel},
     traits::validation::Validatable,
 };
 
 #[utoipa::path(
-    post, 
-    path = "/api/auth/login", 
+    post,
+    description = "Log in to account",
+    path = "/auth/login", 
     tag = "auth", 
-    request_body = LoginRequestData,
+    request_body = UserLoginRequest,
     responses(
         (
             status = 200, 
-            body = UserResponse,
+            body = UserPublicModel,
             description = "Successful login"
         ),
         (
@@ -36,7 +37,7 @@ use crate::{
 pub async fn login(
     req: HttpRequest,
     state: web::Data<crate::state::State>,
-    payload: Json<LoginRequestData>,
+    payload: Json<UserLoginRequest>,
 ) -> Result<HttpResponse> {
     if extract_session_from_cookie(&req, state.db())
         .await?
@@ -63,6 +64,6 @@ pub async fn login(
     repositories::sessions::insert(&session, state.db()).await?;
 
     let cookie = create_session_cookie(&session);
-    let res = UserResponse::from(user);
+    let res = UserPublicModel::from(user);
     Ok(HttpResponse::Ok().cookie(cookie).json(res))
 }

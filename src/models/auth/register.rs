@@ -1,11 +1,10 @@
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 use utoipa::ToSchema;
 
 use crate::traits::validation::Validatable;
 
 #[derive(Debug, Deserialize, ToSchema)]
-#[serde(rename_all = "camelCase")]
-pub struct RegisterRequestData {
+pub struct UserRegisterRequest {
     #[schema(example = "john_doe")]
     pub username: String,
 
@@ -17,7 +16,7 @@ pub struct RegisterRequestData {
 }
 
 // TODO: Cover validation with tests
-impl Validatable for RegisterRequestData {
+impl Validatable for UserRegisterRequest {
     fn validate(&self) -> Result<(), crate::error::Error> {
         if self.password != self.password_confirmation {
             return Err(crate::error::Error::Validation {
@@ -44,14 +43,4 @@ impl Validatable for RegisterRequestData {
         // TODO: Add check for prohibited characters
         Ok(())
     }
-}
-
-#[derive(Debug, Serialize, ToSchema)]
-#[serde(rename_all = "camelCase")]
-pub struct RegisterResponseData {
-    #[schema(example = "Registered")]
-    pub message: &'static str,
-
-    #[schema(example = "john_doe")]
-    pub username: String,
 }

@@ -39,7 +39,8 @@ chrono = { version = "0.4.42", features = ["serde"] }
 bcrypt = "0.17.1"
 # Docs
 utoipa = { version = "5.4.0", features = ["actix_extras", "uuid", "chrono"] }
-utoipa-rapidoc = { version = "6", features = ["actix-web"] }
+# utoipa-rapidoc = { version = "6", features = ["actix-web"] }
+utoipa-swagger-ui = { version = "9", features = ["actix-web", "reqwest"] }
 # Logging
 tracing = "0.1.40"
 tracing-subscriber = "0.3.18"
