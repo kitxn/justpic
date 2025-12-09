@@ -1,6 +1,6 @@
 use sqlx::{Executor, Sqlite, sqlite::SqliteQueryResult};
 
-pub async fn remove<'a, E>(id: &uuid::Uuid, exec: E) -> Result<SqliteQueryResult, sqlx::Error>
+pub async fn remove_by_id<'a, E>(id: &uuid::Uuid, exec: E) -> Result<SqliteQueryResult, sqlx::Error>
 where
     E: Executor<'a, Database = Sqlite>,
 {

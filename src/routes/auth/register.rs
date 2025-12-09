@@ -5,7 +5,7 @@ use actix_web::{
 
 use crate::{
     auth::sessions::{create_session_cookie, extract_session_from_cookie},
-    database::repositories,
+    repositories,
     error::{Error, Result},
     models::{sessions::Session, 
         users::{User, requests::UserCreateRequest, responses::common::UserPublic}}

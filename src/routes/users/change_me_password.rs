@@ -4,7 +4,7 @@ use actix_web::{
 };
 
 use crate::{
-    auth::sessions::extract_session_from_cookie, database::repositories, error::{Error, Result}, models::users::requests::UserChangePasswordRequest, util
+    auth::sessions::extract_session_from_cookie, repositories, error::{Error, Result}, models::users::requests::UserChangePasswordRequest, util
 };
 
 #[utoipa::path(
@@ -39,7 +39,7 @@ pub async fn change_me_password(
             .await??;
 
     let query_res =
-        repositories::users::change_password(session.owner_id(), &hashed_password, state.db())
+        repositories::users::update_password(session.owner_id(), &hashed_password, state.db())
             .await?;
 
     if query_res.rows_affected() == 0 {

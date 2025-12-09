@@ -1,7 +1,7 @@
 use actix_web::{HttpResponse, get, web};
 
 use crate::{
-    database::repositories,
+    repositories,
     error::{Error, Result}, models::users::responses::common::UserPublic,
 };
 

@@ -4,11 +4,7 @@ use actix_web::{
 };
 
 use crate::{
-    auth::sessions::{create_session_cookie, extract_session_from_cookie},
-    database::repositories,
-    error::{Error, Result},
-    models::{sessions::{Session, requests::create::SessionCreateRequest}, users::responses::common::UserPublic},
-    traits::validation::Validatable,
+    auth::sessions::{create_session_cookie, extract_session_from_cookie}, error::{Error, Result}, models::{sessions::{Session, requests::create::SessionCreateRequest}, users::responses::common::UserPublic}, repositories, traits::validation::Validatable
 };
 
 #[utoipa::path(

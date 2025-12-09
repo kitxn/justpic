@@ -3,9 +3,10 @@ use uuid::Uuid;
 
 use crate::{
     SESSION_COOKIE_NAME,
-    database::{DatabasePool, repositories},
+    database::DatabasePool,
     error::{Error, Result},
     models::{sessions::Session, users::User},
+    repositories,
 };
 
 fn parse_session_key_from_cookie(req: &HttpRequest) -> Result<Option<Uuid>> {
