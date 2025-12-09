@@ -11,8 +11,8 @@ async fn main() -> Result<()> {
 
     tracing::info!("Opening database file...");
     let db_path = config.data_dir().join(config.db_path());
-    let pool = database::sqlite::open_db(&db_path).await?;
-    database::sqlite::apply_migrations(&pool).await?;
+    let pool = database::open_file(&db_path).await?;
+    database::apply_migrations(&pool).await?;
 
     tracing::info!("Opening files storage...");
     let storage = storage::Storage::new(config.media_dir().to_path_buf());
