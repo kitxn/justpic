@@ -2,8 +2,7 @@ use actix_web::{HttpRequest, HttpResponse, get, web};
 
 use crate::{
     auth::sessions::extract_user_from_cookie,
-    error::{Error, Result},
-    models::users::UserPublicModel,
+    error::{Error, Result}, models::users::responses::common::UserPublic,
 };
 
 #[utoipa::path(
@@ -14,7 +13,7 @@ use crate::{
     responses(
         (
             status = 200,
-            body = UserPublicModel,
+            body = UserPublic,
             description = "Authenticated user information",
         ),
         (
@@ -32,6 +31,5 @@ pub async fn fetch_me(
         .await?
         .ok_or(Error::Unauthorized)?;
 
-    let res = UserPublicModel::from(user);
-    Ok(HttpResponse::Ok().json(res))
+    Ok(HttpResponse::Ok().json(user.to_public_model()))
 }

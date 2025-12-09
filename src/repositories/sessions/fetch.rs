@@ -1,8 +1,8 @@
 use sqlx::{Executor, Sqlite, query_as};
 
-use crate::database::schemas::sessions::DbSession;
+use crate::models::sessions::Session;
 
-pub async fn fetch_by_id<'a, E>(id: &uuid::Uuid, exec: E) -> Result<Option<DbSession>, sqlx::Error>
+pub async fn fetch_by_id<'a, E>(id: &uuid::Uuid, exec: E) -> Result<Option<Session>, sqlx::Error>
 where
     E: Executor<'a, Database = Sqlite>,
 {

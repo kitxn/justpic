@@ -4,11 +4,7 @@ use actix_web::{
 };
 
 use crate::{
-    auth::sessions::{create_session_cookie, extract_session_from_cookie},
-    database::{repositories, schemas::sessions::DbSession},
-    error::{Error, Result},
-    models::{auth::login::UserLoginRequest, users::UserPublicModel},
-    traits::validation::Validatable,
+    auth::sessions::{create_session_cookie, extract_session_from_cookie}, error::{Error, Result}, models::{sessions::{Session, requests::create::SessionCreateRequest}, users::responses::common::UserPublic}, repositories, traits::validation::Validatable
 };
 
 #[utoipa::path(
@@ -16,11 +12,11 @@ use crate::{
     description = "Log in to account",
     path = "/auth/login", 
     tag = "auth", 
-    request_body = UserLoginRequest,
+    request_body = SessionCreateRequest,
     responses(
         (
             status = 200, 
-            body = UserPublicModel,
+            body = UserPublic,
             description = "Successful login"
         ),
         (
@@ -37,7 +33,7 @@ use crate::{
 pub async fn login(
     req: HttpRequest,
     state: web::Data<crate::state::State>,
-    payload: Json<UserLoginRequest>,
+    payload: Json<SessionCreateRequest>,
 ) -> Result<HttpResponse> {
     if extract_session_from_cookie(&req, state.db())
         .await?
@@ -54,16 +50,17 @@ pub async fn login(
 
     // TODO: move password checking in other task
     let is_valid_password =
-        crate::util::crypto::bcrypt_validate(&payload.password, &user.password)?;
+        crate::util::crypto::bcrypt_validate(&payload.password, user.password())?;
     if !is_valid_password {
         return Err(Error::InvalidCredentials);
     }
 
     // TODO: add user agent getting
-    let session = DbSession::new(user.id, None);
+    let session = Session::new(user.id_copy());
     repositories::sessions::insert(&session, state.db()).await?;
 
     let cookie = create_session_cookie(&session);
-    let res = UserPublicModel::from(user);
-    Ok(HttpResponse::Ok().cookie(cookie).json(res))
+    Ok(HttpResponse::Ok()
+        .cookie(cookie)
+        .json(user.to_public_model()))
 }

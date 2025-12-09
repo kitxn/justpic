@@ -2,7 +2,7 @@ use actix_web::{HttpRequest, HttpResponse, post, web};
 
 use crate::{
     auth::sessions::{extract_session_from_cookie, remove_session_cookie},
-    database::repositories,
+    repositories,
     error::{Error, Result},
 };
 
@@ -32,7 +32,7 @@ pub async fn logout(
         .await?
         .ok_or(Error::Unauthorized)?;
 
-    repositories::sessions::remove(&session.id(), state.db()).await?;
+    repositories::sessions::remove_by_id(session.id(), state.db()).await?;
 
     let cookie = remove_session_cookie();
     Ok(HttpResponse::NoContent().cookie(cookie).finish())

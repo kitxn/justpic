@@ -13,6 +13,8 @@ pub mod routes;
 pub mod traits;
 pub mod util;
 
+pub mod repositories;
+
 pub mod database;
 pub mod storage;
 
@@ -63,6 +65,12 @@ pub fn configure_api_docs(cfg: &mut actix_web::web::ServiceConfig) {
     let openapi = docs::ApiDoc::openapi();
     let config = Config::default().use_base_layout();
     cfg.service(
-        SwaggerUi::new(DOC_UI_URL).url(DOC_JSON_URL, openapi), // .config(config),
+        SwaggerUi::new(DOC_UI_URL)
+            .url(DOC_JSON_URL, openapi)
+            .config(config),
     );
 }
+
+// database::connect()
+// database::migrate()
+// database::open_in_memory()
