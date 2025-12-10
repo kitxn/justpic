@@ -4,7 +4,7 @@ use actix_web::{
 };
 
 use crate::{
-    auth::sessions::{create_session_cookie, remove_session_cookie},
+    SESSION_COOKIE_NAME,
     error::{Error, Result},
     models::{
         sessions::{Session, requests::create::SessionCreateRequest},
@@ -35,7 +35,7 @@ pub async fn login(
 
     payload.validate()?;
 
-    let user = repositories::users::fetch_by_username(&payload.username, state.db())
+    let user = repositories::users::get_by_username(&payload.username, state.db())
         .await?
         .ok_or(Error::InvalidCredentials)?;
 
@@ -50,7 +50,7 @@ pub async fn login(
     let session = Session::new(user.id_copy());
     repositories::sessions::insert(&session, state.db()).await?;
 
-    let cookie = create_session_cookie(&session);
+    let cookie = session.as_cookie();
     Ok(HttpResponse::Ok()
         .cookie(cookie)
         .json(user.to_public_model()))
@@ -66,7 +66,7 @@ pub async fn logout(
 
     repositories::sessions::remove_by_id(session.id(), state.db()).await?;
 
-    let cookie = remove_session_cookie();
+    let cookie = util::cookie::remove(SESSION_COOKIE_NAME);
     Ok(HttpResponse::NoContent().cookie(cookie).finish())
 }
 
@@ -99,7 +99,7 @@ pub async fn register(
     let session = Session::new(user.id_copy());
     repositories::sessions::insert(&session, state.db()).await?;
 
-    let cookie = create_session_cookie(&session);
+    let cookie = session.as_cookie();
 
     Ok(HttpResponse::Created()
         .cookie(cookie)

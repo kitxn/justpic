@@ -7,10 +7,7 @@ use crate::{
     error::{Error, Result},
     models::{
         sessions::Session,
-        users::{
-            User,
-            requests::{UserChangePasswordRequest, UserChangeUsernameRequest},
-        },
+        users::requests::{UserChangePasswordRequest, UserChangeUsernameRequest},
     },
     repositories,
     traits::validation::Validatable,
@@ -35,9 +32,14 @@ pub async fn user_get_me(
     req: HttpRequest,
     state: web::Data<crate::state::State>,
 ) -> Result<HttpResponse> {
-    let user = User::from_request(&req, state.db())
-        .await?
-        .ok_or(Error::Unauthorized)?;
+    // TODO: remove 2N db request
+    let Some(session) = Session::from_request(&req, state.db()).await? else {
+        return Err(Error::Unauthorized);
+    };
+
+    let Some(user) = repositories::users::get_by_session_id(session.id(), state.db()).await? else {
+        return Err(Error::AccessDenied);
+    };
 
     Ok(HttpResponse::Ok().json(user.to_public_model()))
 }
@@ -50,7 +52,7 @@ pub async fn user_get_by_username(
     state: web::Data<crate::state::State>,
     username_param: web::Path<String>,
 ) -> Result<HttpResponse> {
-    let user = repositories::users::fetch_by_username(&username_param, state.db())
+    let user = repositories::users::get_by_username(&username_param, state.db())
         .await?
         .ok_or(Error::ItemNotFound)?;
 

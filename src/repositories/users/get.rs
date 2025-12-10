@@ -3,7 +3,7 @@ use sqlx::{Executor, Sqlite, query_as};
 use crate::models::users::User;
 
 /// Fetch [`User`] item by id
-pub async fn fetch_by_id<'a, E>(id: &uuid::Uuid, exec: E) -> Result<Option<User>, sqlx::Error>
+pub async fn get_by_id<'a, E>(id: &uuid::Uuid, exec: E) -> Result<Option<User>, sqlx::Error>
 where
     E: Executor<'a, Database = Sqlite>,
 {
@@ -29,10 +29,7 @@ where
 }
 
 /// Fetch [`User`] item by session id
-pub async fn fetch_by_session_id<'a, E>(
-    id: &uuid::Uuid,
-    exec: E,
-) -> Result<Option<User>, sqlx::Error>
+pub async fn get_by_session_id<'a, E>(id: &uuid::Uuid, exec: E) -> Result<Option<User>, sqlx::Error>
 where
     E: Executor<'a, Database = Sqlite>,
 {
@@ -53,7 +50,7 @@ where
 }
 
 /// Fetch [`User`] item by username
-pub async fn fetch_by_username<'a, E>(username: &str, exec: E) -> Result<Option<User>, sqlx::Error>
+pub async fn get_by_username<'a, E>(username: &str, exec: E) -> Result<Option<User>, sqlx::Error>
 where
     E: Executor<'a, Database = Sqlite>,
 {

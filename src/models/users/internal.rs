@@ -1,7 +1,4 @@
-use crate::{
-    auth::sessions::parse_session_key_from_cookie, models::users::responses::common::UserPublic,
-    repositories,
-};
+use crate::models::users::responses::common::UserPublic;
 
 /// Internal model for the user entity
 #[derive(sqlx::FromRow)]
@@ -50,26 +47,6 @@ impl User {
             password: password_hash,
             role: super::role::UserRole::Regular,
             created: chrono::Utc::now(),
-        }
-    }
-
-    /// Extract user from HTTP request
-    // TODO: Consider checking the session
-    // lifetime when extracting only the user
-    pub async fn from_request<'a, E>(
-        req: &actix_web::HttpRequest,
-        db_exec: E,
-    ) -> crate::error::Result<Option<Self>>
-    where
-        E: sqlx::Executor<'a, Database = sqlx::sqlite::Sqlite>,
-    {
-        match parse_session_key_from_cookie(req)? {
-            Some(key) => {
-                let user = repositories::users::fetch_by_session_id(&key, db_exec).await?;
-
-                Ok(user)
-            }
-            None => Ok(None),
         }
     }
 

@@ -1,4 +1,9 @@
-use crate::{SESSION_LIFETIME, auth::sessions::parse_session_key_from_cookie, repositories};
+use crate::{
+    SESSION_COOKIE_NAME, SESSION_LIFETIME,
+    error::Error,
+    repositories,
+    util::cookie::{self, parse_cookie},
+};
 
 /// Internal model for the user entity
 #[derive(sqlx::FromRow)]
@@ -59,10 +64,14 @@ impl Session {
     where
         E: sqlx::Executor<'a, Database = sqlx::sqlite::Sqlite>,
     {
-        match parse_session_key_from_cookie(req)? {
-            Some(key) => {
-                let session = repositories::sessions::fetch_by_id(&key, db_exec).await?;
+        match parse_cookie(SESSION_COOKIE_NAME, req) {
+            Some(v) => {
+                let Ok(session_id) = uuid::Uuid::parse_str(&v) else {
+                    tracing::warn!("A session with an invalid key was received: {}", &v);
+                    return Err(Error::Unauthorized);
+                };
 
+                let session = repositories::sessions::get_by_id(&session_id, db_exec).await?;
                 Ok(session)
             }
             None => Ok(None),
@@ -72,5 +81,14 @@ impl Session {
     /// Check if the session has expired
     pub fn is_expired(&self) -> bool {
         self.expires < chrono::Utc::now()
+    }
+
+    pub fn as_cookie<'a>(&'a self) -> actix_web::cookie::Cookie<'a> {
+        use actix_web::cookie::time::{Duration, OffsetDateTime};
+
+        let exp = OffsetDateTime::from_unix_timestamp(self.expires.timestamp())
+            .unwrap_or(OffsetDateTime::now_utc() + Duration::days(28));
+
+        cookie::create(SESSION_COOKIE_NAME, self.id.to_string(), exp)
     }
 }
