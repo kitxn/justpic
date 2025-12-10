@@ -5,6 +5,7 @@ use actix_web::cookie::{
 
 use crate::{SESSION_COOKIE_NAME, models::sessions::Session};
 
+// TODO: Move this function to the session model method
 pub fn create_session_cookie<'a>(session: &Session) -> Cookie<'a> {
     let exp = OffsetDateTime::from_unix_timestamp(session.expires().timestamp())
         .unwrap_or(OffsetDateTime::now_utc() + Duration::days(28));

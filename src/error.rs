@@ -17,6 +17,10 @@ pub enum Error {
     #[display("RESOURCE_NOT_FOUND")]
     ResourceNotFound,
 
+    /// Requested action depended on another action
+    #[display("DEPENDENCY_REQUIRED")]
+    FailedDependency,
+
     /// The user is not authorized in the system
     #[display("UNAUTHORIZED")]
     Unauthorized,
@@ -139,6 +143,7 @@ impl actix_web::ResponseError for Error {
             Error::AccessDenied => StatusCode::FORBIDDEN,
             Error::Conflict => StatusCode::CONFLICT,
             Error::InvalidCredentials | Error::Unauthorized => StatusCode::UNAUTHORIZED,
+            Error::FailedDependency => StatusCode::FAILED_DEPENDENCY,
             _ => StatusCode::INTERNAL_SERVER_ERROR,
         }
     }

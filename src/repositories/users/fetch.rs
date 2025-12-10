@@ -21,6 +21,13 @@ where
     Ok(item)
 }
 
+pub async fn fetch_all<'a, E>(page: usize, exec: E) -> Result<Vec<User>, sqlx::Error>
+where
+    E: Executor<'a, Database = Sqlite>,
+{
+    todo!()
+}
+
 /// Fetch [`User`] item by session id
 pub async fn fetch_by_session_id<'a, E>(
     id: &uuid::Uuid,
