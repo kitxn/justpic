@@ -1,7 +1,6 @@
-use crate::routes;
 use utoipa::OpenApi;
 
-use crate::routes::docs::{users, auth};
+use crate::routes::docs::{users, auth, files};
 
 #[derive(OpenApi)]
 #[openapi(
@@ -9,7 +8,7 @@ use crate::routes::docs::{users, auth};
       (url = "/api")
     ),
     paths(
-      routes::files::get::get_file_stream,
+      files::get_file_stream,
     
       users::get_me,
       users::get_all,
