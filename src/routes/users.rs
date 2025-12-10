@@ -4,9 +4,14 @@ use actix_web::{
 };
 
 use crate::{
-    auth::sessions::{extract_session_from_cookie, extract_user_from_cookie},
     error::{Error, Result},
-    models::users::requests::{UserChangePasswordRequest, UserChangeUsernameRequest},
+    models::{
+        sessions::Session,
+        users::{
+            User,
+            requests::{UserChangePasswordRequest, UserChangeUsernameRequest},
+        },
+    },
     repositories,
     traits::validation::Validatable,
     util,
@@ -16,10 +21,13 @@ pub fn config(cfg: &mut web::ServiceConfig) {
     cfg.service(
         web::scope("/users")
             .route("", web::get().to(users_get))
-            .route("me", web::get().to(user_get_me))
-            .route("by-name/{username}", web::get().to(user_get_by_username))
-            .route("me/username", web::patch().to(user_update_me_username))
-            .route("me/password", web::patch().to(user_update_me_password)),
+            .service(
+                web::scope("/me")
+                    .route("", web::get().to(user_get_me))
+                    .route("/me/username", web::patch().to(user_update_me_username))
+                    .route("/me/password", web::patch().to(user_update_me_password)),
+            )
+            .route("/by-name/{username}", web::get().to(user_get_by_username)),
     );
 }
 
@@ -27,7 +35,7 @@ pub async fn user_get_me(
     req: HttpRequest,
     state: web::Data<crate::state::State>,
 ) -> Result<HttpResponse> {
-    let user = extract_user_from_cookie(&req, state.db())
+    let user = User::from_request(&req, state.db())
         .await?
         .ok_or(Error::Unauthorized)?;
 
@@ -35,14 +43,14 @@ pub async fn user_get_me(
 }
 
 pub async fn users_get() -> Result<HttpResponse> {
-    Ok(HttpResponse::Ok().json(""))
+    Ok(HttpResponse::Ok().json("TODO ENDPOINT!"))
 }
 
 pub async fn user_get_by_username(
     state: web::Data<crate::state::State>,
-    params: web::Path<(String,)>,
+    username_param: web::Path<String>,
 ) -> Result<HttpResponse> {
-    let user = repositories::users::fetch_by_username(&params.0, state.db())
+    let user = repositories::users::fetch_by_username(&username_param, state.db())
         .await?
         .ok_or(Error::ItemNotFound)?;
 
@@ -56,7 +64,7 @@ pub async fn user_update_me_username(
 ) -> Result<HttpResponse> {
     payload.validate()?;
 
-    let session = extract_session_from_cookie(&req, state.db())
+    let session = Session::from_request(&req, state.db())
         .await?
         .ok_or(Error::Unauthorized)?;
 
@@ -85,7 +93,7 @@ pub async fn user_update_me_password(
 
     // TODO: add old password checking
 
-    let session = extract_session_from_cookie(&req, state.db())
+    let session = Session::from_request(&req, state.db())
         .await?
         .ok_or(Error::Unauthorized)?;
 

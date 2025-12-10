@@ -70,7 +70,3 @@ pub fn configure_api_docs(cfg: &mut actix_web::web::ServiceConfig) {
             .config(config),
     );
 }
-
-// database::connect()
-// database::migrate()
-// database::open_in_memory()

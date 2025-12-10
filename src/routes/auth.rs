@@ -4,7 +4,7 @@ use actix_web::{
 };
 
 use crate::{
-    auth::sessions::{create_session_cookie, extract_session_from_cookie, remove_session_cookie},
+    auth::sessions::{create_session_cookie, remove_session_cookie},
     error::{Error, Result},
     models::{
         sessions::{Session, requests::create::SessionCreateRequest},
@@ -29,10 +29,7 @@ pub async fn login(
     state: web::Data<crate::state::State>,
     payload: Json<SessionCreateRequest>,
 ) -> Result<HttpResponse> {
-    if extract_session_from_cookie(&req, state.db())
-        .await?
-        .is_some()
-    {
+    if Session::from_request(&req, state.db()).await?.is_some() {
         return Err(Error::Conflict);
     }
 
@@ -63,7 +60,7 @@ pub async fn logout(
     req: HttpRequest,
     state: web::Data<crate::state::State>,
 ) -> Result<HttpResponse> {
-    let session = extract_session_from_cookie(&req, state.db())
+    let session = Session::from_request(&req, state.db())
         .await?
         .ok_or(Error::Unauthorized)?;
 
@@ -80,10 +77,7 @@ pub async fn register(
 ) -> Result<HttpResponse> {
     payload.validate()?;
 
-    if extract_session_from_cookie(&req, state.db())
-        .await?
-        .is_some()
-    {
+    if Session::from_request(&req, state.db()).await?.is_some() {
         return Err(Error::Conflict);
     }
 

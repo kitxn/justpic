@@ -1,4 +1,4 @@
-use crate::SESSION_LIFETIME;
+use crate::{SESSION_LIFETIME, auth::sessions::parse_session_key_from_cookie, repositories};
 
 /// Internal model for the user entity
 #[derive(sqlx::FromRow)]
@@ -51,7 +51,26 @@ impl Session {
         }
     }
 
+    /// Extract user session from HTTP request
+    pub async fn from_request<'a, E>(
+        req: &actix_web::HttpRequest,
+        db_exec: E,
+    ) -> crate::error::Result<Option<Self>>
+    where
+        E: sqlx::Executor<'a, Database = sqlx::sqlite::Sqlite>,
+    {
+        match parse_session_key_from_cookie(req)? {
+            Some(key) => {
+                let session = repositories::sessions::fetch_by_id(&key, db_exec).await?;
+
+                Ok(session)
+            }
+            None => Ok(None),
+        }
+    }
+
+    /// Check if the session has expired
     pub fn is_expired(&self) -> bool {
-        self.expires >= chrono::Utc::now()
+        self.expires < chrono::Utc::now()
     }
 }
