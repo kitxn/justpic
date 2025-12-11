@@ -44,8 +44,15 @@ pub async fn user_get_me(
     Ok(HttpResponse::Ok().json(user.to_public_model()))
 }
 
-pub async fn users_get() -> Result<HttpResponse> {
-    Ok(HttpResponse::Ok().json("TODO ENDPOINT!"))
+pub async fn users_get(state: web::Data<crate::state::State>) -> Result<HttpResponse> {
+    let list = repositories::users::get_many(0, state.db()).await?;
+
+    let res = list
+        .into_iter()
+        .map(|v| v.to_public_model())
+        .collect::<Vec<_>>();
+
+    Ok(HttpResponse::Ok().json(res))
 }
 
 pub async fn user_get_by_username(

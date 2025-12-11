@@ -21,11 +21,24 @@ where
     Ok(item)
 }
 
-pub async fn fetch_all<'a, E>(page: usize, exec: E) -> Result<Vec<User>, sqlx::Error>
+pub async fn get_many<'a, E>(page: u32, exec: E) -> Result<Vec<User>, sqlx::Error>
 where
     E: Executor<'a, Database = Sqlite>,
 {
-    todo!()
+    let items = query_as(
+        "
+        SELECT id, username, password, role, created
+        FROM users
+        LIMIT ?
+        OFFSET ?
+        ",
+    )
+    .bind(50) // FIX-ME! (temporary hard-coded)
+    .bind(page)
+    .fetch_all(exec)
+    .await?;
+
+    Ok(items)
 }
 
 /// Fetch [`User`] item by session id
