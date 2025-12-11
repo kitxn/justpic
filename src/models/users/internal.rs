@@ -50,11 +50,13 @@ impl User {
         }
     }
 
+    /// Is the user an administrator?
     pub fn is_admin(&self) -> bool {
         self.role.is_admin()
     }
 
     // -- Mappers --
+    /// Make the entity public by removing sensitive fields
     pub fn to_public_model(self) -> UserPublic {
         UserPublic {
             id: self.id,

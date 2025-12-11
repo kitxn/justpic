@@ -8,14 +8,14 @@ use crate::{
 /// Internal model for the user entity
 #[derive(sqlx::FromRow)]
 pub struct Session {
-    pub(super) id: uuid::Uuid,
+    id: uuid::Uuid,
 
-    pub(super) owner_id: uuid::Uuid,
+    owner_id: uuid::Uuid,
 
-    pub(super) agent: Option<String>,
+    agent: Option<String>,
 
-    pub(super) created: chrono::DateTime<chrono::Utc>,
-    pub(super) expires: chrono::DateTime<chrono::Utc>,
+    created: chrono::DateTime<chrono::Utc>,
+    expires: chrono::DateTime<chrono::Utc>,
 }
 
 impl Session {
@@ -83,6 +83,7 @@ impl Session {
         self.expires < chrono::Utc::now()
     }
 
+    /// Throw an access error if the session has expired
     pub fn throw_error_if_expired(&self) -> crate::error::Result<()> {
         if self.is_expired() {
             return Err(crate::error::Error::AccessDenied);
@@ -91,11 +92,17 @@ impl Session {
         Ok(())
     }
 
+    /// Extend the lifetime of a mutable session
+    pub fn extend_life_time(&mut self, extend_for: u64) {
+        self.expires = self.expires + chrono::Days::new(extend_for);
+    }
+
+    /// Create a cookie object based on the given session
     pub fn as_cookie<'a>(&'a self) -> actix_web::cookie::Cookie<'a> {
         use actix_web::cookie::time::{Duration, OffsetDateTime};
 
         let exp = OffsetDateTime::from_unix_timestamp(self.expires.timestamp())
-            .unwrap_or(OffsetDateTime::now_utc() + Duration::days(28));
+            .unwrap_or(OffsetDateTime::now_utc() + Duration::days(SESSION_LIFETIME as i64));
 
         cookie::create(SESSION_COOKIE_NAME, self.id.to_string(), exp)
     }

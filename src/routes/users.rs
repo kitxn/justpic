@@ -33,7 +33,7 @@ pub async fn user_get_me(
     state: web::Data<crate::state::State>,
 ) -> Result<HttpResponse> {
     // TODO: remove 2N db request
-    let Some(session) = Session::from_request(&req, state.db()).await? else {
+    let Some(mut session) = Session::from_request(&req, state.db()).await? else {
         return Err(Error::Unauthorized);
     };
     session.throw_error_if_expired()?;
@@ -42,8 +42,17 @@ pub async fn user_get_me(
         return Err(Error::AccessDenied);
     };
 
+    // Extend the session if its lifetime is approaching the end
     if (0..=2).contains(&session.days_of_life_left()) {
-        // TODO: add auto-extension of session lifetime
+        session.extend_life_time(7);
+        repositories::sessions::update_expire_datetime(session.id(), session.expires(), state.db())
+            .await?;
+
+        tracing::info!("Session lifetime extended: {}", session.id());
+
+        return Ok(HttpResponse::Ok()
+            .cookie(session.as_cookie())
+            .json(user.to_public_model()));
     }
 
     Ok(HttpResponse::Ok().json(user.to_public_model()))
