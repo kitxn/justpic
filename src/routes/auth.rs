@@ -18,9 +18,9 @@ use crate::{
 pub fn config(cfg: &mut web::ServiceConfig) {
     cfg.service(
         web::scope("/auth")
-            .route("login", web::post().to(login))
-            .route("logout", web::post().to(logout))
-            .route("register", web::post().to(register)),
+            .route("/login", web::post().to(login))
+            .route("/logout", web::post().to(logout))
+            .route("/register", web::post().to(register)),
     );
 }
 
@@ -29,7 +29,8 @@ pub async fn login(
     state: web::Data<crate::state::State>,
     payload: Json<SessionCreateRequest>,
 ) -> Result<HttpResponse> {
-    if Session::from_request(&req, state.db()).await?.is_some() {
+    let session = Session::from_request(&req, state.db()).await?;
+    if session.is_some_and(|v| !v.is_expired()) {
         return Err(Error::Conflict);
     }
 
@@ -77,7 +78,8 @@ pub async fn register(
 ) -> Result<HttpResponse> {
     payload.validate()?;
 
-    if Session::from_request(&req, state.db()).await?.is_some() {
+    let session = Session::from_request(&req, state.db()).await?;
+    if session.is_some_and(|v| !v.is_expired()) {
         return Err(Error::Conflict);
     }
 

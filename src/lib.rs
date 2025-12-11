@@ -19,7 +19,7 @@ pub mod storage;
 pub const APP_NAME: &str = env!("CARGO_PKG_NAME");
 pub const APP_VERSION: &str = env!("CARGO_PKG_VERSION");
 
-pub const SESSION_LIFETIME: u64 = 28;
+pub const SESSION_LIFETIME: u64 = 7;
 pub const SESSION_COOKIE_NAME: &str = "client_session";
 
 /// Preparing the application

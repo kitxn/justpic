@@ -21,8 +21,8 @@ pub fn config(cfg: &mut web::ServiceConfig) {
             .service(
                 web::scope("/me")
                     .route("", web::get().to(user_get_me))
-                    .route("/me/username", web::patch().to(user_update_me_username))
-                    .route("/me/password", web::patch().to(user_update_me_password)),
+                    .route("/username", web::patch().to(user_update_me_username))
+                    .route("/password", web::patch().to(user_update_me_password)),
             )
             .route("/by-name/{username}", web::get().to(user_get_by_username)),
     );
@@ -36,10 +36,15 @@ pub async fn user_get_me(
     let Some(session) = Session::from_request(&req, state.db()).await? else {
         return Err(Error::Unauthorized);
     };
+    session.throw_error_if_expired()?;
 
     let Some(user) = repositories::users::get_by_session_id(session.id(), state.db()).await? else {
         return Err(Error::AccessDenied);
     };
+
+    if (0..=2).contains(&session.days_of_life_left()) {
+        // TODO: add auto-extension of session lifetime
+    }
 
     Ok(HttpResponse::Ok().json(user.to_public_model()))
 }
@@ -76,6 +81,7 @@ pub async fn user_update_me_username(
     let session = Session::from_request(&req, state.db())
         .await?
         .ok_or(Error::Unauthorized)?;
+    session.throw_error_if_expired()?;
 
     let username = payload.username.to_lowercase();
 
@@ -105,6 +111,7 @@ pub async fn user_update_me_password(
     let session = Session::from_request(&req, state.db())
         .await?
         .ok_or(Error::Unauthorized)?;
+    session.throw_error_if_expired()?;
 
     let hashed_password =
         tokio::task::spawn_blocking(move || util::crypto::bcrypt_hash(&payload.new_password))

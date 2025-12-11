@@ -83,6 +83,14 @@ impl Session {
         self.expires < chrono::Utc::now()
     }
 
+    pub fn throw_error_if_expired(&self) -> crate::error::Result<()> {
+        if self.is_expired() {
+            return Err(crate::error::Error::AccessDenied);
+        }
+
+        Ok(())
+    }
+
     pub fn as_cookie<'a>(&'a self) -> actix_web::cookie::Cookie<'a> {
         use actix_web::cookie::time::{Duration, OffsetDateTime};
 
@@ -90,5 +98,15 @@ impl Session {
             .unwrap_or(OffsetDateTime::now_utc() + Duration::days(28));
 
         cookie::create(SESSION_COOKIE_NAME, self.id.to_string(), exp)
+    }
+
+    /// The number of days remaining until the session expires
+    pub fn days_of_life_left(&self) -> i16 {
+        if self.is_expired() {
+            return -1;
+        }
+
+        let time_left = self.expires - chrono::Utc::now();
+        time_left.num_days() as i16
     }
 }
