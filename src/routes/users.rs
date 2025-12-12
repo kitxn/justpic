@@ -4,10 +4,13 @@ use actix_web::{
 };
 
 use crate::{
+    SESSION_COOKIE_NAME,
     error::{Error, Result},
     models::{
         sessions::Session,
-        users::requests::{UserChangePasswordRequest, UserChangeUsernameRequest},
+        users::requests::{
+            UserChangePasswordRequest, UserChangeUsernameRequest, UserDeleteAccountRequest,
+        },
     },
     repositories,
     traits::validation::Validatable,
@@ -21,6 +24,7 @@ pub fn config(cfg: &mut web::ServiceConfig) {
             .service(
                 web::scope("/me")
                     .route("", web::get().to(user_get_me))
+                    .route("", web::delete().to(user_delete_me))
                     .route("/username", web::patch().to(user_update_me_username))
                     .route("/password", web::patch().to(user_update_me_password)),
             )
@@ -122,9 +126,10 @@ pub async fn user_update_me_password(
         .ok_or(Error::Unauthorized)?;
     session.throw_error_if_expired()?;
 
+    let input_pw = payload.new_password.clone();
+
     let hashed_password =
-        tokio::task::spawn_blocking(move || util::crypto::bcrypt_hash(&payload.new_password))
-            .await??;
+        tokio::task::spawn_blocking(move || util::crypto::bcrypt_hash(&input_pw)).await??;
 
     let query_res =
         repositories::users::update_password(session.owner_id(), &hashed_password, state.db())
@@ -135,4 +140,44 @@ pub async fn user_update_me_password(
     }
 
     Ok(HttpResponse::NoContent().finish())
+}
+
+pub async fn user_delete_me(
+    req: HttpRequest,
+    state: web::Data<crate::state::State>,
+    payload: Json<UserDeleteAccountRequest>,
+) -> Result<HttpResponse> {
+    payload.validate()?;
+
+    let session = Session::from_request(&req, state.db())
+        .await?
+        .ok_or(Error::Unauthorized)?;
+    session.throw_error_if_expired()?;
+
+    let Some(user) = repositories::users::get_by_session_id(session.id(), state.db()).await? else {
+        return Err(Error::AccessDenied);
+    };
+
+    let input_pw = payload.password.clone();
+    let hashed_pw = user.password().to_string();
+    let is_valid_password = tokio::task::spawn_blocking(move || {
+        crate::util::crypto::bcrypt_validate(&input_pw, &hashed_pw)
+    })
+    .await??;
+    if !is_valid_password {
+        return Err(Error::InvalidCredentials);
+    }
+
+    let id = user.id();
+
+    let query_res = repositories::users::delete_by_id(id, state.db()).await?;
+    if query_res.rows_affected() == 0 {
+        tracing::warn!("Failed to delete user: {}", id);
+        return Err(Error::AccessDenied);
+    }
+
+    tracing::info!("The user was deleted: {}-{}", user.username(), id);
+
+    let cookie = util::cookie::remove(SESSION_COOKIE_NAME);
+    Ok(HttpResponse::NoContent().cookie(cookie).finish())
 }

@@ -15,6 +15,7 @@ use crate::routes::docs::{users, auth, files};
       users::get_by_username,
       users::update_me_username,
       users::update_me_password,
+      users::delete_me,
       
       auth::register,
       auth::login,

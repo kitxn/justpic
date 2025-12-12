@@ -77,3 +77,22 @@ pub fn update_me_username() {}
     )
 )]
 pub fn update_me_password() {}
+
+#[utoipa::path(
+    delete,
+    path = "/users/me", 
+    tag = "users.me", 
+    request_body = requests::UserDeleteAccountRequest,
+    responses(
+        (
+            status = 204,
+        ),
+        (
+            status = 401, 
+        ),
+        (
+            status = 403,
+        )
+    )
+)]
+pub fn delete_me() {}
