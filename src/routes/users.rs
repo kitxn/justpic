@@ -117,19 +117,33 @@ pub async fn user_update_me_password(
     state: web::Data<crate::state::State>,
     payload: Json<UserChangePasswordRequest>,
 ) -> Result<HttpResponse> {
+    let payload = payload.into_inner();
     payload.validate()?;
-
-    // TODO: add old password checking
 
     let session = Session::from_request(&req, state.db())
         .await?
         .ok_or(Error::Unauthorized)?;
     session.throw_error_if_expired()?;
 
-    let input_pw = payload.new_password.clone();
+    let Some(user) = repositories::users::get_by_session_id(session.id(), state.db()).await? else {
+        return Err(Error::AccessDenied);
+    };
+
+    let input_old_pw = payload.old_password;
+    let hashed_pass = user.password().to_string();
+
+    let is_valid_password = tokio::task::spawn_blocking(move || {
+        crate::util::crypto::bcrypt_validate(&input_old_pw, &hashed_pass)
+    })
+    .await??;
+    if !is_valid_password {
+        return Err(Error::InvalidCredentials);
+    }
+
+    let input_new_pw = payload.new_password;
 
     let hashed_password =
-        tokio::task::spawn_blocking(move || util::crypto::bcrypt_hash(&input_pw)).await??;
+        tokio::task::spawn_blocking(move || util::crypto::bcrypt_hash(&input_new_pw)).await??;
 
     let query_res =
         repositories::users::update_password(session.owner_id(), &hashed_password, state.db())
