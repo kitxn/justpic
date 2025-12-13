@@ -40,7 +40,6 @@ impl Validatable for UserCreateRequest {
             });
         }
 
-        // TODO: Add check for prohibited characters
         Ok(())
     }
 }
