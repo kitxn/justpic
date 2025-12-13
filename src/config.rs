@@ -2,8 +2,6 @@
 
 use std::path::{Path, PathBuf};
 
-use crate::error::Result;
-
 const DEFAULT_HOST_ADDR: &str = "0.0.0.0:8080";
 
 const DEFAULT_DATA_DIR: &str = "./data";
@@ -25,16 +23,6 @@ pub struct Configuration {
 }
 
 impl Configuration {
-    /// Load application [`Configuration`] from standard config path (`./config.json`)
-    pub fn load_from_default_file() -> Result<Self> {
-        todo!()
-    }
-
-    /// Save the current application [`Configuration`] to the standard config path (`./config.json`)
-    pub fn save_to_default() -> Result<()> {
-        todo!()
-    }
-
     pub fn host_addr(&self) -> &str {
         &self.host_addr
     }

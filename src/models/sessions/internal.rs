@@ -1,16 +1,21 @@
-use crate::SESSION_LIFETIME;
+use crate::{
+    SESSION_COOKIE_NAME, SESSION_LIFETIME,
+    error::Error,
+    repositories,
+    util::cookie::{self, parse_cookie},
+};
 
 /// Internal model for the user entity
 #[derive(sqlx::FromRow)]
 pub struct Session {
-    pub(super) id: uuid::Uuid,
+    id: uuid::Uuid,
 
-    pub(super) owner_id: uuid::Uuid,
+    owner_id: uuid::Uuid,
 
-    pub(super) agent: Option<String>,
+    agent: Option<String>,
 
-    pub(super) created: chrono::DateTime<chrono::Utc>,
-    pub(super) expires: chrono::DateTime<chrono::Utc>,
+    created: chrono::DateTime<chrono::Utc>,
+    expires: chrono::DateTime<chrono::Utc>,
 }
 
 impl Session {
@@ -51,7 +56,64 @@ impl Session {
         }
     }
 
+    /// Extract user session from HTTP request
+    pub async fn from_request<'a, E>(
+        req: &actix_web::HttpRequest,
+        db_exec: E,
+    ) -> crate::error::Result<Option<Self>>
+    where
+        E: sqlx::Executor<'a, Database = sqlx::sqlite::Sqlite>,
+    {
+        match parse_cookie(SESSION_COOKIE_NAME, req) {
+            Some(v) => {
+                let Ok(session_id) = uuid::Uuid::parse_str(&v) else {
+                    tracing::warn!("A session with an invalid key was received: {}", &v);
+                    return Err(Error::Unauthorized);
+                };
+
+                let session = repositories::sessions::get_by_id(&session_id, db_exec).await?;
+                Ok(session)
+            }
+            None => Ok(None),
+        }
+    }
+
+    /// Check if the session has expired
     pub fn is_expired(&self) -> bool {
-        self.expires >= chrono::Utc::now()
+        self.expires < chrono::Utc::now()
+    }
+
+    /// Throw an access error if the session has expired
+    pub fn throw_error_if_expired(&self) -> crate::error::Result<()> {
+        if self.is_expired() {
+            return Err(crate::error::Error::AccessDenied);
+        }
+
+        Ok(())
+    }
+
+    /// Extend the lifetime of a mutable session
+    pub fn extend_life_time(&mut self, extend_for: u64) {
+        self.expires = self.expires + chrono::Days::new(extend_for);
+    }
+
+    /// Create a cookie object based on the given session
+    pub fn as_cookie<'a>(&'a self) -> actix_web::cookie::Cookie<'a> {
+        use actix_web::cookie::time::{Duration, OffsetDateTime};
+
+        let exp = OffsetDateTime::from_unix_timestamp(self.expires.timestamp())
+            .unwrap_or(OffsetDateTime::now_utc() + Duration::days(SESSION_LIFETIME as i64));
+
+        cookie::create(SESSION_COOKIE_NAME, self.id.to_string(), exp)
+    }
+
+    /// The number of days remaining until the session expires
+    pub fn days_of_life_left(&self) -> i16 {
+        if self.is_expired() {
+            return -1;
+        }
+
+        let time_left = self.expires - chrono::Utc::now();
+        time_left.num_days() as i16
     }
 }

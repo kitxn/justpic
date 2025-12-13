@@ -1,7 +1,7 @@
 use std::path::Path;
 
 use sqlx::{
-    Connection, Sqlite, SqliteConnection,
+    Connection, SqliteConnection,
     sqlite::{SqliteConnectOptions, SqlitePool},
 };
 

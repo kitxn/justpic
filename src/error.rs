@@ -17,9 +17,16 @@ pub enum Error {
     #[display("RESOURCE_NOT_FOUND")]
     ResourceNotFound,
 
+    /// Requested action depended on another action
+    #[display("DEPENDENCY_REQUIRED")]
+    FailedDependency,
+
     /// The user is not authorized in the system
     #[display("UNAUTHORIZED")]
     Unauthorized,
+
+    #[display("CURRENT_SESSION_IS_EXPIRED")]
+    SessionExpired,
 
     /// The sought object was not found
     ///
@@ -136,9 +143,10 @@ impl actix_web::ResponseError for Error {
         match self {
             Error::ItemNotFound | Error::ResourceNotFound => StatusCode::NOT_FOUND,
             Error::BadInput | Error::Validation { .. } => StatusCode::BAD_REQUEST,
-            Error::AccessDenied => StatusCode::FORBIDDEN,
+            Error::AccessDenied | Error::SessionExpired => StatusCode::FORBIDDEN,
             Error::Conflict => StatusCode::CONFLICT,
             Error::InvalidCredentials | Error::Unauthorized => StatusCode::UNAUTHORIZED,
+            Error::FailedDependency => StatusCode::FAILED_DEPENDENCY,
             _ => StatusCode::INTERNAL_SERVER_ERROR,
         }
     }
