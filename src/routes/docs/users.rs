@@ -33,6 +33,13 @@ pub fn get_all() {}
     get, 
     path = "/users/by-name/{username}", 
     tag = "users", 
+    params (
+        (
+            "username", 
+            description = "Name of the user being getting for",
+            example = "john_doe"
+        )
+    ),
     responses(
         (
             status = 200,
