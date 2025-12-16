@@ -151,7 +151,7 @@ mod tests {
 
         let time_delta = Utc::now().timestamp() - item.created.timestamp();
         assert!(
-            (-1..=5).contains(&time_delta),
+            (0..=5).contains(&time_delta),
             "The creation time should roughly correspond to the current one"
         );
     }
