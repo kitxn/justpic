@@ -13,6 +13,12 @@ pub enum Error {
     #[display("ACCESS_DENIED")]
     AccessDenied,
 
+    #[display("BROKEN_ITEM_RELATION: {from} -> {to}")]
+    BrokenRelation {
+        from: &'static str,
+        to: &'static str,
+    },
+
     /// The required resource was not found
     #[display("RESOURCE_NOT_FOUND")]
     ResourceNotFound,
@@ -73,9 +79,8 @@ pub enum Error {
     #[display("CRYPTO_ERROR")]
     CryptoError(bcrypt::BcryptError),
 
-    /// File storage error
-    #[display("STORAGE_ERROR: {_0}")]
-    Storage(crate::storage::StorageError),
+    #[display("MULTIPART_PARSING_ERROR: {_0}")]
+    Multipart(actix_multipart::MultipartError),
 }
 
 impl From<sqlx::migrate::MigrateError> for Error {
@@ -129,9 +134,9 @@ impl From<std::io::Error> for Error {
     }
 }
 
-impl From<crate::storage::StorageError> for Error {
-    fn from(value: crate::storage::StorageError) -> Self {
-        Error::Storage(value)
+impl From<actix_multipart::MultipartError> for Error {
+    fn from(value: actix_multipart::MultipartError) -> Self {
+        Error::Multipart(value)
     }
 }
 
