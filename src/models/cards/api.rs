@@ -5,8 +5,8 @@ use crate::models::files::api::FileApiModel;
 #[derive(Debug, serde::Serialize, utoipa::ToSchema)]
 pub struct CardApiModel {
     /// Card id
-    #[schema(example = 12857460700869832838_u64)]
-    pub(super) id: u64,
+    #[schema(example = "12857460700869832838")]
+    pub(super) id: String,
 
     /// File associated with the card
     pub(super) file: FileApiModel,
@@ -32,4 +32,17 @@ pub struct CardApiModel {
     /// Card availability
     #[schema(example = true)]
     pub(super) is_private: bool,
+}
+
+/// Open API multipart request schema
+#[derive(Debug, utoipa::ToSchema)]
+pub struct CreateCardRequestSchema {
+    #[schema(value_type = String, format = Binary)]
+    pub(super) file: Vec<u8>,
+
+    #[schema(example = "Cute cats :3")]
+    pub(super) title: Option<String>,
+
+    #[schema(example = "Really cute cats!")]
+    pub(super) description: Option<String>,
 }

@@ -86,8 +86,7 @@ pub async fn register(
     let payload = payload.into_inner();
 
     let password = payload.password;
-    let hashed_password =
-        tokio::task::spawn_blocking(move || util::crypto::bcrypt_hash(&password)).await??;
+    let hashed_password = util::crypto::bcrypt_hash(&password)?;
 
     let user = User::new(&payload.username, hashed_password);
 

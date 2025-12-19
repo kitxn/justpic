@@ -9,7 +9,7 @@ use crate::{
 /// Internal model for card entity
 pub struct Card {
     /// Unique numeric ID of the card
-    id: u64,
+    id: String,
 
     /// Model of the file associated with this card
     file: File,
@@ -35,8 +35,8 @@ pub struct Card {
 
 impl Card {
     // -- GETTERS --
-    pub fn id(&self) -> u64 {
-        self.id
+    pub fn id(&self) -> &str {
+        &self.id
     }
 
     pub fn file(&self) -> &File {
@@ -76,7 +76,7 @@ impl Card {
         source_url: Option<String>,
         is_private: bool,
     ) -> Self {
-        let id = util::unid::generate();
+        let id = util::unid::generate().to_string();
         let created = Utc::now();
 
         Card {
@@ -91,10 +91,14 @@ impl Card {
         }
     }
 
-    /// The user's ability to see the cat
-    pub fn is_available_for_user(&self, user_id: uuid::Uuid) -> bool {
+    pub fn is_owner(&self, user_id: &uuid::Uuid) -> bool {
+        &self.owner_id == user_id
+    }
+
+    /// The user's ability to see the card
+    pub fn can_view(&self, user_id: &uuid::Uuid) -> bool {
         if self.is_private() {
-            return self.owner_id == user_id;
+            return self.is_owner(user_id);
         }
         true
     }
@@ -117,7 +121,8 @@ impl<'r> FromRow<'r, SqliteRow> for Card {
     fn from_row(row: &'r SqliteRow) -> Result<Self, sqlx::Error> {
         // Manual mapping with nested structure
         Ok(Card {
-            id: row.try_get("card_id")?,
+            // TODO: REFACTOR PARSE ERROR MAPPING
+            id: row.try_get::<String, _>("card_id")?,
             file: File::new_raw(
                 row.try_get("file_id")?,
                 row.try_get("file_uploader_id")?,

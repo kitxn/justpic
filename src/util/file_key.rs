@@ -2,9 +2,7 @@
 
 /// Generate random file key
 pub fn generate() -> String {
-    let uuid = uuid::Uuid::new_v4().to_string();
-
-    uuid.replace("-", "")
+    uuid::Uuid::new_v4().simple().to_string()
 }
 
 #[cfg(test)]

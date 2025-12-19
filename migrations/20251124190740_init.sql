@@ -1,6 +1,6 @@
 -- Content tables
 CREATE TABLE cards (
-  id          BIGINT        PRIMARY KEY,
+  id          VARCHAR(32)   PRIMARY KEY,
   file_key    VARCHAR(32)   NOT NULL REFERENCES files(id) ON DELETE CASCADE,
 
   owner_id    UUID          NOT NULL REFERENCES users(id) ON DELETE CASCADE,

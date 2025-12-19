@@ -132,18 +132,14 @@ pub async fn user_update_me_password(
     let input_old_pw = payload.old_password;
     let hashed_pass = user.password().to_string();
 
-    let is_valid_password = tokio::task::spawn_blocking(move || {
-        crate::util::crypto::bcrypt_validate(&input_old_pw, &hashed_pass)
-    })
-    .await??;
+    let is_valid_password = util::crypto::bcrypt_validate(&input_old_pw, &hashed_pass)?;
     if !is_valid_password {
         return Err(Error::InvalidCredentials);
     }
 
     let input_new_pw = payload.new_password;
 
-    let hashed_password =
-        tokio::task::spawn_blocking(move || util::crypto::bcrypt_hash(&input_new_pw)).await??;
+    let hashed_password = util::crypto::bcrypt_hash(&input_new_pw)?;
 
     let query_res =
         repositories::users::update_password(session.owner_id(), &hashed_password, state.db())
@@ -174,11 +170,8 @@ pub async fn user_delete_me(
 
     let input_pw = payload.password.clone();
     let hashed_pw = user.password().to_string();
-    let is_valid_password = tokio::task::spawn_blocking(move || {
-        crate::util::crypto::bcrypt_validate(&input_pw, &hashed_pw)
-    })
-    .await??;
-    if !is_valid_password {
+
+    if !util::crypto::bcrypt_validate(&input_pw, &hashed_pw)? {
         return Err(Error::InvalidCredentials);
     }
 
