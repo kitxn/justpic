@@ -79,6 +79,9 @@ pub enum Error {
     #[display("CRYPTO_ERROR")]
     CryptoError(bcrypt::BcryptError),
 
+    #[display("PAYLOAD_TOO_LARGE")]
+    PayloadTooLarge,
+
     #[display("MULTIPART_PARSING_ERROR: {_0}")]
     Multipart(actix_multipart::MultipartError),
 }
@@ -148,6 +151,7 @@ impl actix_web::ResponseError for Error {
         match self {
             Error::ItemNotFound | Error::ResourceNotFound => StatusCode::NOT_FOUND,
             Error::BadInput | Error::Validation { .. } => StatusCode::BAD_REQUEST,
+            Error::PayloadTooLarge => StatusCode::PAYLOAD_TOO_LARGE,
             Error::AccessDenied | Error::SessionExpired => StatusCode::FORBIDDEN,
             Error::Conflict => StatusCode::CONFLICT,
             Error::InvalidCredentials | Error::Unauthorized => StatusCode::UNAUTHORIZED,

@@ -1,3 +1,5 @@
+use std::path::{Path, PathBuf};
+
 use futures::StreamExt;
 use tokio::{fs::File, io::AsyncWriteExt};
 use tokio_util::io::ReaderStream;
@@ -26,6 +28,7 @@ impl Storage {
 
     pub fn init(&self) -> Result<(), Error> {
         std::fs::create_dir_all(&self.root)?;
+        std::fs::create_dir_all(&self.temp)?;
 
         tracing::info!("File storage opened!");
 
@@ -33,9 +36,7 @@ impl Storage {
     }
 
     pub async fn get(&self, key: &str) -> Result<FileStream, Error> {
-        // todo: add base key validation
-
-        let path = self.root.join(&key[..2]).join(&key[2..4]).join(key);
+        let path = generate_path_from_key(&self.root, key);
         let file = File::open(path).await?;
 
         let stream = FileStream::new(file);
@@ -43,13 +44,19 @@ impl Storage {
         Ok(stream)
     }
 
-    pub async fn set_from_stream<T, B, E>(&self, key: &str, stream: &mut T) -> Result<(), Error>
+    pub async fn set_from_stream<T, B, E>(
+        &self,
+        key: &str,
+        stream: &mut T,
+        is_temp: bool,
+    ) -> Result<(), Error>
     where
         T: futures::Stream<Item = Result<B, E>> + Unpin,
         B: AsRef<[u8]>,
         Error: From<E>,
     {
-        let path = self.root.join(&key[..2]).join(&key[2..4]).join(key);
+        let root = if is_temp { &self.temp } else { &self.root };
+        let path = generate_path_from_key(root, key);
 
         if let Some(parent) = path.parent() {
             tokio::fs::create_dir_all(parent).await?;
@@ -65,24 +72,68 @@ impl Storage {
 
                 uploaded_bytes += chunk.len();
                 if uploaded_bytes > MAX_UPLOADING_FILE_SIZE {
-                    // FIXME: TEMP ERROR TYPE!
-                    return Err(Error::BadInput);
+                    return Err(Error::PayloadTooLarge);
                 }
 
                 file.write_all(chunk).await?;
             }
 
-            tracing::info!("Writed {} bytes for {}", uploaded_bytes, key);
+            tracing::debug!("Writen {} bytes for {}", uploaded_bytes, key);
+        }
+
+        Ok(())
+    }
+
+    pub async fn copy(&self, from: &Path, to: &Path) -> Result<(), Error> {
+        if !from.is_file() {
+            return Err(Error::ItemNotFound);
+        }
+
+        if let Some(parent) = to.parent() {
+            tokio::fs::create_dir_all(parent).await?;
+        }
+
+        tokio::fs::copy(from, to).await?;
+        Ok(())
+    }
+
+    pub async fn commit_temp(&self, key: &str) -> Result<(), Error> {
+        let temp_path = generate_path_from_key(&self.temp, key);
+        if !temp_path.is_file() {
+            return Err(Error::ItemNotFound);
+        }
+
+        let dest_path = generate_path_from_key(&self.root, key);
+        if let Some(parent) = dest_path.parent() {
+            tokio::fs::create_dir_all(parent).await?;
+        }
+
+        if let Err(err) = tokio::fs::rename(&temp_path, &dest_path).await {
+            match err.kind() {
+                std::io::ErrorKind::CrossesDevices => {
+                    tracing::warn!("Error moving file: fallback on copy");
+
+                    self.copy(&temp_path, &dest_path).await?;
+                    tokio::fs::remove_file(&temp_path).await?;
+                }
+                _ => {
+                    return Err(err.into());
+                }
+            }
         }
 
         Ok(())
     }
 
     pub async fn remove(&self, key: &str) -> Result<(), Error> {
-        let path = self.root.join(&key[..2]).join(&key[2..4]).join(key);
+        let path = generate_path_from_key(&self.root, key);
 
         tokio::fs::remove_file(path).await?;
 
         Ok(())
     }
+}
+
+fn generate_path_from_key(root: &Path, key: &str) -> PathBuf {
+    root.join(&key[..2]).join(&key[2..4]).join(key)
 }
