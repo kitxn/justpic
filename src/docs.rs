@@ -1,6 +1,6 @@
 use utoipa::OpenApi;
 
-use crate::routes::docs::{users, auth, files};
+use crate::routes::docs::{users, auth, files, cards};
 
 #[derive(OpenApi)]
 #[openapi(
@@ -19,7 +19,9 @@ use crate::routes::docs::{users, auth, files};
       
       auth::register,
       auth::login,
-      auth::logout
+      auth::logout,
+
+      cards::create_new,
     ),
     info(
       title = "justpic-backend",

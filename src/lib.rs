@@ -22,6 +22,8 @@ pub const APP_VERSION: &str = env!("CARGO_PKG_VERSION");
 pub const SESSION_LIFETIME: u64 = 7;
 pub const SESSION_COOKIE_NAME: &str = "client_session";
 
+pub const TEMP_DIR: &str = "tmp";
+
 /// Preparing the application
 /// and initializing the basic components
 pub async fn setup_app(
@@ -31,7 +33,10 @@ pub async fn setup_app(
 ) -> error::Result<state::State> {
     tracing::info!("Setting up {APP_NAME}-{APP_VERSION}...");
 
-    let state = state::State::new(cfg.clone(), pool, storage);
+    let temp_storage = storage::Storage::new(cfg.temp_dir().to_path_buf(), false);
+    temp_storage.init()?;
+
+    let state = state::State::new(cfg.clone(), pool, storage, temp_storage);
 
     Ok(state)
 }

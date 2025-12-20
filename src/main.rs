@@ -15,7 +15,7 @@ async fn main() -> Result<()> {
     database::apply_migrations(&pool).await?;
 
     tracing::info!("Opening files storage...");
-    let storage = storage::Storage::new(config.media_dir().to_path_buf());
+    let storage = storage::Storage::new(config.media_dir().to_path_buf(), true);
     storage.init()?;
 
     let state = justpic_backend::setup_app(&config, pool, storage).await?;
