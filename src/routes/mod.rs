@@ -12,6 +12,7 @@ pub fn config(cfg: &mut web::ServiceConfig) {
         web::scope("/api")
             .configure(users::config)
             .configure(auth::config)
+            .configure(files::config)
             .configure(cards::config),
     );
 }

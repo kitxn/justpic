@@ -1,11 +1,13 @@
+use std::process::id;
+
 use chrono::{DateTime, Utc};
 
 use crate::{
-    models::files::{api::FileApiModel, state::FileState},
+    models::files::{api::FileApiModel, state::FileState, uploading::UploadedFile},
     util,
 };
 
-#[derive(sqlx::FromRow)]
+#[derive(sqlx::FromRow, Debug)]
 /// Internal model for file entity
 ///
 /// Stores all information about the file
@@ -98,6 +100,23 @@ impl File {
             height,
             created,
             color,
+            state,
+        )
+    }
+
+    pub fn from_uploaded(item: UploadedFile, uploader_id: uuid::Uuid) -> Self {
+        let created = Utc::now();
+        let state = FileState::Pending;
+
+        Self::new_raw(
+            item.file_id,
+            uploader_id,
+            item.mimetype,
+            item.size as i64,
+            0, // temp
+            0, // temp
+            created,
+            "ffffff".into(), // temp
             state,
         )
     }

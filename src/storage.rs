@@ -3,7 +3,10 @@ use std::path::PathBuf;
 use tokio::fs::File;
 use tokio_util::io::ReaderStream;
 
-use crate::{error::Error, util};
+use crate::{
+    error::Error,
+    util::{self, stream::StreamProcessingResult},
+};
 
 pub type FileStream = ReaderStream<File>;
 
@@ -45,7 +48,11 @@ impl Storage {
     }
 
     /// Save file to storage by stream
-    pub async fn set_from_stream<T, B, E>(&self, key: &str, stream: &mut T) -> Result<(), Error>
+    pub async fn set_from_stream<T, B, E>(
+        &self,
+        key: &str,
+        stream: &mut T,
+    ) -> Result<StreamProcessingResult, Error>
     where
         T: futures::Stream<Item = Result<B, E>> + Unpin,
         B: AsRef<[u8]>,
@@ -57,9 +64,10 @@ impl Storage {
             tokio::fs::create_dir_all(parent).await?;
         }
 
-        util::stream::write_file_from_stream(path, stream, MAX_UPLOADING_FILE_SIZE).await?;
+        let res =
+            util::stream::write_file_from_stream(path, stream, MAX_UPLOADING_FILE_SIZE).await?;
 
-        Ok(())
+        Ok(res)
     }
 
     /// Destroys the storage and deletes all files from it
@@ -70,15 +78,26 @@ impl Storage {
     /// Move the item with the specified key to another storage
     pub async fn move_to_another(&self, storage: &Storage, key: &str) -> Result<(), Error> {
         let path = self.generate_path(key);
+        let dest = storage.generate_path(key);
 
-        todo!();
-    }
+        tracing::info!("Moving btw storages: {:?} => {:?}", path, dest);
 
-    /// Accept an item from another repository
-    async fn accept_from_another(&self, key: &str) -> Result<(), Error> {
-        let path = self.generate_path(key);
+        if let Some(parent) = dest.parent() {
+            tokio::fs::create_dir_all(parent).await?;
+        }
 
-        todo!()
+        if let Err(e) = tokio::fs::rename(path, dest).await {
+            match e.kind() {
+                std::io::ErrorKind::CrossesDevices => {
+                    // Fallback
+
+                    todo!()
+                }
+                _ => return Err(e.into()),
+            }
+        }
+
+        Ok(())
     }
 
     /// Delete a file from storage using a key
@@ -89,9 +108,10 @@ impl Storage {
 
     /// Generate an internal path to a file using a key
     fn generate_path(&self, key: &str) -> PathBuf {
-        match self.use_subdir {
-            true => self.root.join(&key[..2]).join(&key[2..4]).join(key),
-            false => self.root.join(&key),
+        if self.use_subdir {
+            self.root.join(&key[..2]).join(&key[2..4]).join(key)
+        } else {
+            self.root.join(key)
         }
     }
 }

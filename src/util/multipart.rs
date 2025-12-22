@@ -12,7 +12,7 @@ pub struct MultipartSegment {
     value: MultipartSegmentItem,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum MultipartSegmentItem {
     Text(String),
 
@@ -48,15 +48,16 @@ impl MultipartSegment {
             (Some(..), Some(mimetype)) => {
                 // File with mimetype
                 let temp_store = state.temp_store();
-                let store_key = util::file_key::generate();
+                let file_id = util::file_key::generate();
 
-                temp_store.set_from_stream(&store_key, &mut field).await?;
+                let res = temp_store.set_from_stream(&file_id, &mut field).await?;
 
                 MultipartSegment {
                     key,
                     value: MultipartSegmentItem::File(UploadedFile {
-                        store_key,
+                        file_id,
                         mimetype,
+                        size: res.bytes_transfered,
                     }),
                 }
             }
@@ -77,6 +78,14 @@ impl MultipartSegment {
         };
 
         Ok(Some(seg))
+    }
+
+    pub fn key(&self) -> &str {
+        &self.key
+    }
+
+    pub fn value(&self) -> &MultipartSegmentItem {
+        &self.value
     }
 }
 

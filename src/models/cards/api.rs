@@ -1,3 +1,5 @@
+use std::str::FromStr;
+
 use chrono::{DateTime, Utc};
 
 use crate::models::files::api::FileApiModel;
@@ -38,11 +40,14 @@ pub struct CardApiModel {
 #[derive(Debug, utoipa::ToSchema)]
 pub struct CreateCardRequestSchema {
     #[schema(value_type = String, format = Binary)]
-    pub(super) file: Vec<u8>,
+    file: Vec<u8>,
 
     #[schema(example = "Cute cats :3")]
-    pub(super) title: Option<String>,
+    title: Option<String>,
+
+    #[schema(example = "false")]
+    is_private: Option<bool>,
 
     #[schema(example = "Really cute cats!")]
-    pub(super) description: Option<String>,
+    description: Option<String>,
 }

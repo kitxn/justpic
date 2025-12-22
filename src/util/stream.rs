@@ -6,6 +6,10 @@ use tokio::{fs::File, io::AsyncWriteExt};
 
 const MB_BYTES_COUNT: usize = 1024 * 1024;
 
+pub struct StreamProcessingResult {
+    pub bytes_transfered: usize,
+}
+
 /// Record the transmitted stream to the buffer
 pub async fn write_buff_from_stream<T, B, E>(
     stream: &mut T,
@@ -44,7 +48,7 @@ pub async fn write_file_from_stream<T, B, E, P>(
     path: P,
     stream: &mut T,
     limit: usize,
-) -> Result<(), Error>
+) -> Result<StreamProcessingResult, Error>
 where
     T: futures::Stream<Item = Result<B, E>> + Unpin,
     B: AsRef<[u8]>,
@@ -52,12 +56,11 @@ where
     P: AsRef<Path>,
 {
     let limit = limit * MB_BYTES_COUNT;
+    let mut uploaded_bytes = 0;
 
     let path = path.as_ref();
     let mut file = File::create(path).await?;
     {
-        let mut uploaded_bytes = 0;
-
         while let Some(chunk) = stream.next().await {
             let chunk = chunk?;
             let chunk = chunk.as_ref();
@@ -73,5 +76,9 @@ where
         tracing::debug!("Writen {} bytes for {:?}", uploaded_bytes, path);
     }
 
-    Ok(())
+    let res = StreamProcessingResult {
+        bytes_transfered: uploaded_bytes,
+    };
+
+    Ok(res)
 }

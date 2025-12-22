@@ -1,5 +1,6 @@
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct UploadedFile {
-    pub store_key: String,
+    pub file_id: String,
     pub mimetype: String,
+    pub size: usize,
 }
