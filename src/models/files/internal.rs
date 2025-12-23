@@ -7,7 +7,7 @@ use crate::{
     util,
 };
 
-#[derive(sqlx::FromRow, Debug)]
+#[derive(sqlx::FromRow, Debug, Clone)]
 /// Internal model for file entity
 ///
 /// Stores all information about the file

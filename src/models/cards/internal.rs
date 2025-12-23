@@ -7,7 +7,7 @@ use crate::{
 };
 
 /// Internal model for card entity
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Card {
     /// Unique numeric ID of the card
     id: String,

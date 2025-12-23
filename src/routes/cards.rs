@@ -6,7 +6,7 @@ use actix_web::{
 
 use crate::{
     error::{Error, Result},
-    models::{cards::builder::MultipartCardBuilder, sessions::Session},
+    models::{cards::builder::MultipartCardBuilder, files::state::FileState, sessions::Session},
     repositories,
     util::multipart::parse_multipart,
 };
@@ -14,8 +14,8 @@ use crate::{
 pub fn config(cfg: &mut web::ServiceConfig) {
     cfg.service(
         web::scope("/cards")
-            .route("", get().to(cards_get_all))
-            .route("/", post().to(card_create_new)),
+            .route("", get().to(get_all))
+            .route("/", post().to(create_new)),
     );
 }
 
@@ -26,7 +26,7 @@ pub fn config(cfg: &mut web::ServiceConfig) {
 /// ### Structure of models
 /// `Multipart` -> `Vec<MultipartSegment>` ->
 /// `MultipartCardBuilder` -> `Card` -> `CardApiModel`
-pub async fn card_create_new(
+pub async fn create_new(
     req: HttpRequest,
     state: web::Data<crate::state::State>,
     payload: Multipart,
@@ -35,7 +35,6 @@ pub async fn card_create_new(
     let Some(session) = Session::from_request(&req, state.db()).await? else {
         return Err(Error::Unauthorized);
     };
-    // If there is no session, we return an error
     session.throw_error_if_expired()?;
 
     // Multipart parsing
@@ -58,20 +57,56 @@ pub async fn card_create_new(
     tx.commit().await?;
 
     // Moving a file from temporary storage to permanent storage
-    state
+    let move_res = state
         .temp_store()
         .move_to_another(state.store(), card.file().id())
-        .await?;
+        .await;
+
+    if let Err(e) = move_res {
+        tracing::error!("Failed to move file: {e}");
+        repositories::files::update_file_state(card.file().id(), FileState::Failed, state.db())
+            .await?;
+    }
+
+    let res = card.clone().to_api_model();
 
     // Run background media processing in a separate thread
+    tokio::spawn(async move {
+        // Transferring ownership to the processing thread
+        let _card = card;
+        let _state = state;
 
-    // TODO!
+        // TODO!
+    });
 
     // Converting a card into a public API model and return it
-    let res = card.to_api_model();
     Ok(HttpResponse::Created().json(res))
 }
 
-pub async fn cards_get_all(req: HttpRequest) -> Result<HttpResponse> {
+pub async fn get_all(req: HttpRequest) -> Result<HttpResponse> {
     Ok(HttpResponse::Ok().finish())
+}
+
+pub async fn get_by_owner(req: HttpRequest) -> Result<HttpResponse> {
+    Ok(HttpResponse::Ok().finish())
+}
+
+pub async fn get_me(req: HttpRequest) -> Result<HttpResponse> {
+    Ok(HttpResponse::Ok().finish())
+}
+
+pub async fn get_by_id(req: HttpRequest) -> Result<HttpResponse> {
+    Ok(HttpResponse::Ok().finish())
+}
+
+pub async fn update_title(req: HttpRequest) -> Result<HttpResponse> {
+    Ok(HttpResponse::Ok().finish())
+}
+
+pub async fn update_description(req: HttpRequest) -> Result<HttpResponse> {
+    Ok(HttpResponse::Ok().finish())
+}
+
+pub async fn delete_by_id(req: HttpRequest) -> Result<HttpResponse> {
+    Ok(HttpResponse::NoContent().finish())
 }

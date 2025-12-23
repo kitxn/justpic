@@ -1,4 +1,4 @@
-#[derive(Debug, sqlx::Type, serde::Serialize, utoipa::ToSchema)]
+#[derive(Debug, sqlx::Type, serde::Serialize, utoipa::ToSchema, Clone)]
 #[serde(rename_all = "lowercase")]
 pub enum FileState {
     #[sqlx(rename = "pending")]
