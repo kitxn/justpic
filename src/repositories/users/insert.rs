@@ -1,6 +1,6 @@
 use sqlx::{Executor, Sqlite, sqlite::SqliteQueryResult};
 
-use crate::models::users::User;
+use crate::users::models::User;
 
 /// Insert [`User`] item into database
 pub async fn insert<'a, E>(item: &User, exec: E) -> Result<SqliteQueryResult, sqlx::Error>

@@ -1,6 +1,6 @@
 use utoipa::OpenApi;
 
-use crate::routes::docs::{users, auth, files, cards};
+use crate::handlers::docs::{users, auth, files, cards};
 
 #[derive(OpenApi)]
 #[openapi(

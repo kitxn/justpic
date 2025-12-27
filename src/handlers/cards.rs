@@ -5,8 +5,9 @@ use actix_web::{
 };
 
 use crate::{
-    error::{Error, Result},
-    models::{cards::builder::MultipartCardBuilder, files::state::FileState, sessions::Session},
+    application::sessions::extract_from_req,
+    error::Result,
+    models::{cards::builder::MultipartCardBuilder, files::state::FileState},
     repositories,
     util::multipart::parse_multipart,
 };
@@ -32,9 +33,7 @@ pub async fn create_new(
     payload: Multipart,
 ) -> Result<HttpResponse> {
     // Extracting a session from a cookie
-    let Some(session) = Session::from_request(&req, state.db()).await? else {
-        return Err(Error::Unauthorized);
-    };
+    let session = extract_from_req(&req, state.db()).await?;
     session.throw_error_if_expired()?;
 
     // Multipart parsing

@@ -1,6 +1,6 @@
 use sqlx::{Executor, Sqlite, query_as};
 
-use crate::models::users::User;
+use crate::{types::pagination::PaginationParams, users::models::User};
 
 /// Fetch [`User`] item by id
 pub async fn get_by_id<'a, E>(id: &uuid::Uuid, exec: E) -> Result<Option<User>, sqlx::Error>
@@ -21,7 +21,10 @@ where
     Ok(item)
 }
 
-pub async fn get_many<'a, E>(page: u32, exec: E) -> Result<Vec<User>, sqlx::Error>
+pub async fn get_many<'a, E>(
+    pagination: PaginationParams,
+    exec: E,
+) -> Result<Vec<User>, sqlx::Error>
 where
     E: Executor<'a, Database = Sqlite>,
 {
@@ -33,8 +36,8 @@ where
         OFFSET ?
         ",
     )
-    .bind(50) // FIX-ME! (temporary hard-coded)
-    .bind(page)
+    .bind(pagination.limit()) // FIX-ME! (temporary hard-coded)
+    .bind(pagination.offset())
     .fetch_all(exec)
     .await?;
 

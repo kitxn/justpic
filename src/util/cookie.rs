@@ -8,7 +8,7 @@ pub fn create<'a>(key: &'a str, value: String, expires: OffsetDateTime) -> Cooki
         .finish()
 }
 
-pub fn remove<'a>(key: &'a str) -> Cookie<'a> {
+pub fn empty<'a>(key: &'a str) -> Cookie<'a> {
     Cookie::build(key, "")
         .path("/")
         .expires(OffsetDateTime::now_utc())

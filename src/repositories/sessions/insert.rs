@@ -1,6 +1,6 @@
 use sqlx::{Executor, Sqlite, sqlite::SqliteQueryResult};
 
-use crate::models::sessions::Session;
+use crate::sessions::models::Session;
 
 pub async fn insert<'a, E>(item: &Session, exec: E) -> Result<SqliteQueryResult, sqlx::Error>
 where

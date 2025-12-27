@@ -1,6 +1,6 @@
 use sqlx::{Executor, Sqlite, query_as};
 
-use crate::models::sessions::Session;
+use crate::sessions::models::Session;
 
 pub async fn get_by_id<'a, E>(id: &uuid::Uuid, exec: E) -> Result<Option<Session>, sqlx::Error>
 where

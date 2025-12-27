@@ -7,7 +7,7 @@ use sqlx::{
 
 pub type DatabasePool = sqlx::Pool<sqlx::sqlite::Sqlite>;
 
-pub async fn open_file(path: &Path) -> sqlx::Result<DatabasePool> {
+pub async fn open(path: &Path) -> sqlx::Result<DatabasePool> {
     if let Some(path) = path.parent() {
         std::fs::create_dir_all(path)?;
     }
@@ -27,7 +27,7 @@ pub async fn open_in_memory() -> sqlx::Result<SqliteConnection> {
     SqliteConnection::connect_with(&opts).await
 }
 
-pub async fn apply_migrations(pool: &DatabasePool) -> sqlx::Result<()> {
+pub async fn migrate(pool: &DatabasePool) -> sqlx::Result<()> {
     sqlx::migrate!().run(pool).await?;
 
     tracing::info!("Migrations applied!");
