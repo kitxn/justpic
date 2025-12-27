@@ -3,7 +3,7 @@ use sqlx::{FromRow, Row, sqlite::SqliteRow};
 
 use crate::{
     models::{cards::api::CardApiModel, files::internal::File},
-    util,
+    utils,
 };
 
 /// Internal model for card entity
@@ -77,7 +77,7 @@ impl Card {
         source_url: Option<String>,
         is_private: bool,
     ) -> Self {
-        let id = util::unid::generate().to_string();
+        let id = utils::unid::generate().to_string();
         let created = Utc::now();
 
         Card {

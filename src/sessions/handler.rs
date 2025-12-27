@@ -4,12 +4,11 @@ use actix_web::{
 };
 
 use crate::{
-    SESSION_COOKIE_NAME,
     error::{Error, Result},
     sessions::{self, models::SessionCreateRequest},
     state::State,
     users,
-    util::{self, crypto, validation::Validatable},
+    utils::{crypto, validation::Validatable},
 };
 
 const DOMAIN_NAME: &str = "/sessions";

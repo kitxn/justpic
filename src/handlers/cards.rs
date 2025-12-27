@@ -9,7 +9,7 @@ use crate::{
     error::Result,
     models::{cards::builder::MultipartCardBuilder, files::state::FileState},
     repositories,
-    util::multipart::parse_multipart,
+    utils::multipart::parse_multipart,
 };
 
 pub fn config(cfg: &mut web::ServiceConfig) {

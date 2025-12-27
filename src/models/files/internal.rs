@@ -1,10 +1,8 @@
-use std::process::id;
-
 use chrono::{DateTime, Utc};
 
 use crate::{
     models::files::{api::FileApiModel, state::FileState, uploading::UploadedFile},
-    util,
+    utils,
 };
 
 #[derive(sqlx::FromRow, Debug, Clone)]
@@ -86,7 +84,7 @@ impl File {
         height: u32,
         color: String,
     ) -> Self {
-        let id = util::file_key::generate();
+        let id = utils::file_key::generate();
         let created = Utc::now();
 
         let state = FileState::Pending;

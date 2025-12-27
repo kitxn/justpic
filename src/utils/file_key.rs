@@ -7,7 +7,7 @@ pub fn generate() -> String {
 
 #[cfg(test)]
 mod tests {
-    use crate::util::file_key;
+    use crate::utils::file_key;
 
     #[test]
     fn test_file_key_generation() {

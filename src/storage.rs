@@ -5,7 +5,7 @@ use tokio_util::io::ReaderStream;
 
 use crate::{
     error::Error,
-    util::{self, stream::StreamProcessingResult},
+    utils::{self, stream::StreamProcessingResult},
 };
 
 pub type FileStream = ReaderStream<File>;
@@ -65,7 +65,7 @@ impl Storage {
         }
 
         let res =
-            util::stream::write_file_from_stream(path, stream, MAX_UPLOADING_FILE_SIZE).await?;
+            utils::stream::write_file_from_stream(path, stream, MAX_UPLOADING_FILE_SIZE).await?;
 
         Ok(res)
     }

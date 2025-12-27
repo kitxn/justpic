@@ -1,7 +1,7 @@
 use serde::Deserialize;
 use utoipa::ToSchema;
 
-use crate::{SESSION_LIFETIME, util::validation::Validatable};
+use crate::{SESSION_LIFETIME, utils::validation::Validatable};
 
 /// Internal model for the user entity
 #[derive(sqlx::FromRow)]

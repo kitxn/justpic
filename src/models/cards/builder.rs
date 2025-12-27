@@ -4,7 +4,7 @@ use crate::{
         cards::internal::Card,
         files::{internal::File, uploading::UploadedFile},
     },
-    util::multipart::{MultipartSegment, MultipartSegmentItem},
+    utils::multipart::{MultipartSegment, MultipartSegmentItem},
 };
 
 pub struct MultipartCardBuilder {

@@ -3,11 +3,8 @@ use sqlx::SqlitePool;
 use uuid::Uuid;
 
 use crate::{
-    SESSION_COOKIE_NAME, SESSION_LIFETIME,
-    error::Error,
-    repositories,
-    sessions::models::Session,
-    util::cookie::{self, parse_cookie},
+    SESSION_COOKIE_NAME, SESSION_LIFETIME, error::Error, repositories, sessions::models::Session,
+    utils::cookie,
 };
 
 /// Gets a potentially existing session
@@ -15,7 +12,7 @@ pub async fn try_extract_from_req(
     req: &HttpRequest,
     db: &SqlitePool,
 ) -> Result<Option<Session>, Error> {
-    let Some(session_id_string) = parse_cookie(SESSION_COOKIE_NAME, req) else {
+    let Some(session_id_string) = cookie::parse_cookie(SESSION_COOKIE_NAME, req) else {
         return Ok(None);
     };
 

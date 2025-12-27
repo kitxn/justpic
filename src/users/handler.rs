@@ -16,7 +16,7 @@ use crate::{
             UserDeleteRequest,
         },
     },
-    util::validation::Validatable,
+    utils::validation::Validatable,
 };
 
 /// Shared domain for working with users

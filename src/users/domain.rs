@@ -1,4 +1,4 @@
-use crate::{error::Error, repositories, users::models::User, util};
+use crate::{error::Error, repositories, users::models::User, utils};
 
 /// Create a User model and insert it into the database
 pub async fn create_and_insert(
@@ -6,7 +6,7 @@ pub async fn create_and_insert(
     password: &str,
     pool: &sqlx::SqlitePool,
 ) -> Result<User, Error> {
-    let password = util::crypto::hash_password(password)?;
+    let password = utils::crypto::hash_password(password)?;
 
     let user = User::new(username, password);
 

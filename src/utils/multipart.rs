@@ -1,7 +1,7 @@
 use actix_multipart::{Field, Multipart};
 use futures::StreamExt;
 
-use crate::{error::Error, models::files::uploading::UploadedFile, state::State, util};
+use crate::{error::Error, models::files::uploading::UploadedFile, state::State, utils};
 
 const MAX_TEXT_FIELD_SIZE: usize = 5;
 
@@ -48,7 +48,7 @@ impl MultipartSegment {
             (Some(..), Some(mimetype)) => {
                 // File with mimetype
                 let temp_store = state.temp_store();
-                let file_id = util::file_key::generate();
+                let file_id = utils::file_key::generate();
 
                 let res = temp_store.set_from_stream(&file_id, &mut field).await?;
 
@@ -90,7 +90,7 @@ impl MultipartSegment {
 }
 
 async fn parse_field_to_string(field: &mut Field) -> Result<String, Error> {
-    let bytes = util::stream::write_buff_from_stream(field, MAX_TEXT_FIELD_SIZE).await?;
+    let bytes = utils::stream::write_buff_from_stream(field, MAX_TEXT_FIELD_SIZE).await?;
 
     String::from_utf8(bytes).map_err(|e| {
         tracing::warn!("Failed to parse the multipart field into a string: {e}");

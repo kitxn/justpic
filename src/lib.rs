@@ -14,7 +14,7 @@ pub mod state;
 pub mod handlers;
 pub mod models;
 
-pub mod util;
+pub mod utils;
 
 pub mod repositories;
 
